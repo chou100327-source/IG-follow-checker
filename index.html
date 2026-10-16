@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IG 追蹤分析器</title>
+<style>
+:root{--bg:#fafafa;--fg:#1c1c1e;--mut:#6b6b70;--card:#fff;--line:#e4e4e7;--acc:#d6249f}
+@media (prefers-color-scheme:dark){:root{--bg:#111113;--fg:#f2f2f3;--mut:#9a9aa1;--card:#1c1c1f;--line:#2e2e33;--acc:#f06bc8}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 -apple-system,"PingFang TC",sans-serif}
+main{max-width:760px;margin:0 auto;padding:24px 16px 64px}
+h1{font-size:1.6rem;margin:.2em 0}
+.sub{color:var(--mut);margin:0 0 20px}
+#drop{border:2px dashed var(--line);border-radius:14px;background:var(--card);padding:36px 16px;text-align:center;cursor:pointer}
+#drop.over{border-color:var(--acc)}
+#drop b{color:var(--acc)}
+.privacy{font-size:.85rem;color:var(--mut);margin-top:10px}
+.sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:20px 0}
+.sum div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+.sum b{display:block;font-size:1.5rem}
+.sum span{color:var(--mut);font-size:.85rem}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tabs button{border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:999px;padding:6px 12px;font:inherit;font-size:.9rem;cursor:pointer}
+.tabs button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+#q{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--fg);font:inherit;margin-bottom:8px}
+.desc{color:var(--mut);font-size:.9rem;margin:4px 0 8px}
+ul{list-style:none;padding:0;margin:0;background:var(--card);border:1px solid var(--line);border-radius:12px}
+li{display:flex;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--line)}
+li:last-child{border:0}
+li a{color:var(--fg);text-decoration:none;font-weight:500}
+li span{color:var(--mut);font-size:.85rem}
+.note{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:16px;font-size:.9rem;color:var(--mut)}
+.hidden{display:none}
+.err{color:#d33;margin-top:12px}
+</style>
+</head>
+<body>
+<main>
+<h1>IG 追蹤分析器</h1>
+<p class="sub">找出誰沒回追你、你沒回追誰，以及退追紀錄。</p>
+
+<div id="drop">
+  <div><b>點擊選擇</b>或拖曳 Instagram 匯出的 <b>.zip</b>（JSON 格式）到這裡</div>
+  <div class="privacy">🔒 檔案只在你的瀏覽器中處理，不會上傳到任何伺服器。</div>
+  <input id="file" type="file" accept=".zip,.json" multiple hidden>
+</div>
+<div id="err" class="err"></div>
+
+<div id="result" class="hidden">
+  <div class="sum" id="sum"></div>
+  <div class="tabs" id="tabs"></div>
+  <input id="q" placeholder="搜尋帳號…">
+  <div class="desc" id="desc"></div>
+  <ul id="list"></ul>
+  <div class="note" id="note"></div>
+</div>
+
+<div class="note">
+  <b>如何取得檔案：</b>Instagram → 設定 → 帳號中心 → 你的資訊和權限 → 下載你的資訊 → 自訂資訊選「追蹤者與追蹤中」，日期「所有時間」，格式「<b>JSON</b>」。
+</div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const fix=s=>{try{return decodeURIComponent(escape(s))}catch(e){return s}};
+const KEY="ig-follow-snapshot-v1";
+let data={}, tab="notBack";
+
+function entries(obj){
+  let items=obj;
+  if(obj&&!Array.isArray(obj)) items=Object.values(obj).find(Array.isArray)||[];
+  const out=[];
+  for(const it of items){
+    const s=(it.string_list_data||[{}])[0]||{};
+    const name=fix(s.value||it.title||"").trim();
+    if(name) out.push([name,s.timestamp||0]);
+  }
+  return out;
+}
+
+async function readFiles(files){
+  const found={}; // basename -> [json]
+  const add=(name,text)=>{
+    const base=name.split("/").pop();
+    if(!base.endsWith(".json")||!/follow/i.test(name)) return;
+    try{(found[base]=found[base]||[]).push(JSON.parse(text))}catch(e){}
+  };
+  for(const f of files){
+    if(f.name.endsWith(".zip")){
+      const z=await JSZip.loadAsync(f);
+      for(const n of Object.keys(z.files)){
+        if(!z.files[n].dir&&/follow/i.test(n)&&n.endsWith(".json")) add(n,await z.files[n].async("string"));
+      }
+    } else add(f.name,await f.text());
+  }
+  return found;
+}
+
+const collect=(found,prefix)=>{
+  const m=new Map();
+  for(const [f,list] of Object.entries(found)) if(f.startsWith(prefix))
+    for(const o of list) for(const [n,t] of entries(o)) m.set(n,t);
+  return m;
+};
+
+function analyze(found){
+  const followers=collect(found,"followers"), following=collect(found,"following");
+  if(!followers.size&&!following.size) throw new Error("找不到追蹤資料，請確認匯出格式是 JSON，且包含「追蹤者與追蹤中」。");
+  const unf=collect(found,"recently_unfollowed"), pend=collect(found,"pending_follow_requests");
+  const pick=(a,pred)=>[...a].filter(([n])=>pred(n)).sort((x,y)=>y[1]-x[1]);
+  const d={
+    followers,following,
+    notBack:pick(following,n=>!followers.has(n)),
+    fans:pick(followers,n=>!following.has(n)),
+    mutual:pick(followers,n=>following.has(n)),
+    unfollowed:[...unf].sort((x,y)=>y[1]-x[1]),
+    pending:[...pend].sort((x,y)=>y[1]-x[1]),
+    lost:[],added:[],prevDate:null
+  };
+  let prev=null;
+  try{prev=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+  if(prev){
+    const pf=new Set(prev.followers);
+    d.lost=prev.followers.filter(n=>!followers.has(n)).map(n=>[n,0]);
+    d.added=[...followers.keys()].filter(n=>!pf.has(n)).map(n=>[n,0]);
+    d.prevDate=prev.date;
+  }
+  try{localStorage.setItem(KEY,JSON.stringify({date:new Date().toISOString().slice(0,10),followers:[...followers.keys()]}))}catch(e){}
+  return d;
+}
+
+const TABS=[
+  ["notBack","沒回追我","你追蹤他，但他沒追蹤你。日期 = 你追蹤他的時間。"],
+  ["fans","我沒回追","他追蹤你，但你沒追蹤他。日期 = 他追蹤你的時間。"],
+  ["mutual","互相追蹤",""],
+  ["lost","退追你的人","與上次分析比對：上次是你的追蹤者，現在不是。"],
+  ["added","新追蹤你","與上次分析比對的新追蹤者。"],
+  ["unfollowed","我取消追蹤","來自 Instagram 官方紀錄的「最近取消追蹤」。"],
+  ["pending","待處理請求",""]
+];
+
+function render(){
+  $("result").classList.remove("hidden");
+  $("sum").innerHTML=[["追蹤者",data.followers.size],["追蹤中",data.following.size],["互相追蹤",data.mutual.length],["沒回追我",data.notBack.length]]
+    .map(([l,v])=>`<div><b>${v}</b><span>${l}</span></div>`).join("");
+  $("tabs").innerHTML=TABS.map(([k,l])=>`<button data-k="${k}" class="${k===tab?"on":""}">${l} ${data[k].length}</button>`).join("");
+  $("tabs").querySelectorAll("button").forEach(b=>b.onclick=()=>{tab=b.dataset.k;render()});
+  const t=TABS.find(x=>x[0]===tab);
+  $("desc").textContent=t[2];
+  const q=$("q").value.trim().toLowerCase();
+  const ul=$("list"); ul.innerHTML="";
+  const rows=data[tab].filter(([n])=>n.toLowerCase().includes(q));
+  for(const [n,ts] of rows){
+    const li=document.createElement("li"), a=document.createElement("a"), s=document.createElement("span");
+    a.href="https://www.instagram.com/"+encodeURIComponent(n); a.target="_blank"; a.rel="noopener"; a.textContent="@"+n;
+    s.textContent=ts?new Date(ts*1000).toLocaleDateString("zh-TW"):"";
+    li.append(a,s); ul.append(li);
+  }
+  if(!rows.length){ul.innerHTML='<li><span>沒有資料</span></li>'}
+  $("note").textContent=data.prevDate
+    ? `退追比對基準：上次分析日期 ${data.prevDate}（存在你的瀏覽器中）。`
+    : "這是第一次分析，已把快照存在你的瀏覽器。之後匯出新檔案再上傳，就能看到退追者與新追蹤者。（清除瀏覽器資料會遺失快照。）";
+}
+
+async function handle(files){
+  $("err").textContent="";
+  try{data=analyze(await readFiles([...files]));tab="notBack";render()}
+  catch(e){$("err").textContent=e.message}
+}
+const drop=$("drop");
+drop.onclick=()=>$("file").click();
+$("file").onchange=e=>handle(e.target.files);
+drop.ondragover=e=>{e.preventDefault();drop.classList.add("over")};
+drop.ondragleave=()=>drop.classList.remove("over");
+drop.ondrop=e=>{e.preventDefault();drop.classList.remove("over");handle(e.dataTransfer.files)};
+$("q").oninput=()=>{if(data.followers)render()};
+</script>
+</body>
+</html>
