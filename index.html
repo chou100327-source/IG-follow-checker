@@ -97,6 +97,34 @@ li a:hover .go{opacity:1}
 
 .note{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-top:18px;font-size:.88rem;color:var(--mut);animation:rise .7s .25s both}
 .note b{color:var(--fg)}
+/* 詳細教學 */
+.guide{margin-top:12px;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;animation:rise .7s .3s both}
+.guide summary{list-style:none;cursor:pointer;padding:14px 16px;font-weight:700;display:flex;align-items:center;justify-content:space-between;transition:background .2s}
+.guide summary::-webkit-details-marker{display:none}
+.guide summary:hover{background:var(--soft)}
+.guide summary::after{content:"+";font-size:1.4rem;line-height:1;color:var(--acc);transition:transform .3s}
+.guide[open] summary::after{transform:rotate(45deg)}
+.gbody{padding:4px 18px 18px;font-size:.92rem;line-height:1.7;animation:rise .4s both}
+.gbody h3{margin:20px 0 6px;font-size:1rem;display:flex;align-items:center;gap:8px}
+.gbody h3 i{font-style:normal;width:24px;height:24px;border-radius:50%;background:var(--grad);color:#fff;display:inline-grid;place-items:center;font-size:.8rem;font-weight:700;flex:none}
+.gbody ol,.gbody ul{margin:6px 0;padding-left:1.4em}
+.gbody ul{list-style:disc}
+.gbody li{display:list-item;animation:none;margin:3px 0}
+.gbody .tip{background:var(--soft);border-radius:10px;padding:8px 12px;margin:8px 0;font-size:.86rem;color:var(--mut)}
+.gbody .tip b{color:var(--fg)}
+.gbody dl{margin:6px 0}
+.gbody dt{font-weight:700;margin-top:10px}
+.gbody dd{margin:2px 0 0;color:var(--mut)}
+/* 回饋 */
+.fb{margin-top:18px;text-align:center;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 16px;animation:rise .7s .35s both}
+.fb h2{margin:0 0 4px;font-size:1.15rem}
+.fb p{margin:0 0 14px;color:var(--mut);font-size:.9rem}
+.fbb{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.fbb a{display:inline-flex;align-items:center;gap:6px;padding:10px 18px;border-radius:999px;font-weight:600;font-size:.9rem;text-decoration:none;transition:transform .2s,box-shadow .2s}
+.fbb a:hover{transform:translateY(-3px)}
+.fbb .gh{background:var(--fg);color:var(--bg)}
+.fbb .dm{background:var(--grad);color:#fff;box-shadow:0 6px 16px rgba(214,41,118,.3)}
+.fb small{display:block;margin-top:12px;color:var(--mut);font-size:.76rem}
 footer .credit{font-size:.92rem;letter-spacing:.06em;color:var(--fg);opacity:.85}
 footer .ig{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:7px 16px;border-radius:999px;background:var(--grad);background-size:200% 200%;color:#fff;font-weight:600;font-size:.85rem;text-decoration:none;box-shadow:0 6px 16px rgba(214,41,118,.3);transition:transform .2s,box-shadow .2s}
 footer .ig:hover{transform:translateY(-3px);box-shadow:0 10px 22px rgba(214,41,118,.4);animation:shift 3s ease infinite}
@@ -146,6 +174,76 @@ footer{text-align:center;color:var(--mut);font-size:.78rem;margin-top:28px}
     <li>只勾選<b>追蹤者與追蹤中</b>，日期選<b>所有時間</b>，格式選 <b>JSON</b></li>
     <li>等待通知（<b>通常數分鐘至數小時，最久約 1–2 天</b>），下載 .zip 後直接上傳（<b>4 天內有效</b>）</li>
   </ol>
+</div>
+<details class="guide">
+  <summary>📖 詳細教學（點開看完整步驟）</summary>
+  <div class="gbody">
+    <h3><i>1</i>申請匯出（手機 Instagram App）</h3>
+    <ol>
+      <li>打開 Instagram，點右下角<b>個人檔案</b>，再點右上角<b>選單（☰）</b>。</li>
+      <li>點<b>設定與活動</b>，找到並進入<b>帳號中心</b>。</li>
+      <li>點<b>你的資訊和權限</b> → <b>匯出你的資訊</b>。</li>
+      <li>點<b>建立匯出</b>，選擇你的 Instagram 帳號，匯出位置選<b>匯出到裝置</b>。</li>
+      <li>點<b>自訂資訊</b>，<b>只勾選「追蹤者與追蹤中」</b>，其他全部不要勾。</li>
+      <li><b>日期範圍</b>選<b>所有時間</b>。</li>
+      <li><b>格式</b>選 <b>JSON</b>。選成 HTML 的話本工具讀不了。</li>
+      <li>按<b>開始匯出</b>。</li>
+    </ol>
+    <div class="tip"><b>為什麼只勾追蹤者與追蹤中？</b>檔案最小、處理最快，也不會匯出你的訊息、照片等私人資料。</div>
+    <div class="tip">選項名稱可能因 App 版本略有不同。用電腦的話，也可以到 instagram.com → 更多 → 設定 → 帳號中心，步驟相同。</div>
+
+    <h3><i>2</i>等待並下載</h3>
+    <ul>
+      <li>通常<b>數分鐘至數小時</b>，最久約 1–2 天。完成後 Instagram 會發通知，並寄信到你填的信箱。</li>
+      <li>等待期間可以關閉 App，不用一直開著。</li>
+      <li>下載連結只有 <b>4 天</b>有效，收到通知後請盡快下載 .zip 檔。</li>
+    </ul>
+
+    <h3><i>3</i>上傳分析</h3>
+    <ul>
+      <li>把下載的 <b>.zip 直接拖進頁面最上方的上傳框</b>，或點一下選擇檔案。<b>不用解壓縮</b>。</li>
+      <li>幾秒內就會顯示結果。檔案只在你的瀏覽器中處理，<b>不會上傳到任何伺服器</b>。</li>
+    </ul>
+
+    <h3><i>4</i>怎麼看結果</h3>
+    <dl>
+      <dt>對方未回追</dt><dd>你追蹤了他，但他沒有追蹤你。日期是你追蹤他的時間。</dd>
+      <dt>我未回追</dt><dd>他追蹤了你，但你沒有追蹤他。</dd>
+      <dt>互相追蹤</dt><dd>你們彼此都有追蹤。</dd>
+      <dt>流失追蹤者</dt><dd>上次分析時是你的追蹤者，這次不是了，也就是取消追蹤你或帳號已消失。</dd>
+      <dt>新增追蹤者</dt><dd>上次之後新追蹤你的人。</dd>
+      <dt>已取消追蹤</dt><dd>Instagram 官方記錄的、你最近取消追蹤的帳號。</dd>
+      <dt>待處理請求</dt><dd>你送出、對方還沒接受的追蹤請求。</dd>
+    </dl>
+    <div class="tip">點任一帳號會開啟對方的 Instagram 主頁。上方搜尋框可直接輸入帳號搜尋。</div>
+
+    <h3><i>5</i>怎麼看「誰退追我」</h3>
+    <ol>
+      <li>第一次上傳時，工具會把你當下的追蹤者名單<b>存在這個瀏覽器</b>。</li>
+      <li>過一段時間（建議每週或每月）重新匯出，再上傳一次。</li>
+      <li>工具會和上次比對，列出<b>流失追蹤者</b>與<b>新增追蹤者</b>。</li>
+    </ol>
+    <div class="tip"><b>注意：</b>快照存在你的瀏覽器裡。請固定用同一台裝置、同一個瀏覽器，清除網站資料會讓快照消失。</div>
+
+    <h3><i>6</i>常見問題</h3>
+    <dl>
+      <dt>會不會需要我的 Instagram 密碼？</dt><dd>不會。本工具完全不需要登入你的帳號。</dd>
+      <dt>我的資料安全嗎？</dt><dd>檔案只在你自己的瀏覽器中處理，不會傳到任何伺服器。</dd>
+      <dt>顯示「找不到追蹤資料」？</dt><dd>多半是格式選成 HTML，或沒勾選「追蹤者與追蹤中」。請重新匯出，格式選 JSON。</dd>
+      <dt>數字和 Instagram 主頁差 1～2 個？</dt><dd>通常是已停用或被封鎖的帳號，屬於正常現象。</dd>
+      <dt>帳號名稱顯示的是 ID，不是暱稱？</dt><dd>Instagram 匯出的追蹤名單只有帳號 ID，沒有暱稱與頭貼。</dd>
+    </dl>
+  </div>
+</details>
+
+<div class="fb">
+  <h2>💬 使用上有問題或建議？</h2>
+  <p>哪裡不好用、哪裡看不懂、想要什麼功能，都歡迎告訴我。</p>
+  <div class="fbb">
+    <a class="dm" href="https://ig.me/m/mu_3.27" target="_blank" rel="noopener">私訊我 Instagram</a>
+    <a class="gh" href="https://github.com/chou100327-source/ig-follow-checker/issues/new" target="_blank" rel="noopener">在 GitHub 回報</a>
+  </div>
+  <small>回報時請不要貼上你的追蹤名單或匯出檔，描述問題就好。</small>
 </div>
 <footer><div class="credit">Designed &amp; Developed by</div>
 <a class="ig" href="https://www.instagram.com/mu_3.27" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5.5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r=".6" fill="currentColor"/></svg>@mu_3.27</a><div class="fine">獨立開發之工具，與 Instagram 及 Meta 無關 · 資料僅於本機瀏覽器處理</div></footer>
