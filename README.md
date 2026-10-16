@@ -6,8 +6,6 @@
 
 🔗 **[立即使用 → ig-follow-checker-five.vercel.app](https://ig-follow-checker-five.vercel.app/)**
 
-![GitHub Repo stars](https://img.shields.io/github/stars/chou100327-source/ig-follow-checker?style=social)
-
 </div>
 
 ---
