@@ -96,6 +96,9 @@ li a:hover .go{opacity:1}
 
 .note{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-top:18px;font-size:.88rem;color:var(--mut);animation:rise .7s .25s both}
 .note b{color:var(--fg)}
+.how ol{margin:10px 0 8px;padding-left:1.3em}
+.how li{display:list-item;animation:none;margin:0 0 6px;color:var(--fg)}
+.how p{margin:6px 0 0}
 footer{text-align:center;color:var(--mut);font-size:.78rem;margin-top:28px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -130,8 +133,18 @@ footer{text-align:center;color:var(--mut);font-size:.78rem;margin-top:28px}
   <div class="note" id="note"></div>
 </div>
 
-<div class="note">
-  <b>如何取得檔案：</b>Instagram → 設定 → 帳號中心 → 你的資訊和權限 → 下載你的資訊 → 自訂資訊選「追蹤者與追蹤中」，日期「所有時間」，格式「<b>JSON</b>」。
+<div class="note how">
+  <b>如何取得檔案</b>
+  <ol>
+    <li>打開 Instagram App，點右下角<b>個人檔案</b>，再點右上角<b>選單（☰）</b>。</li>
+    <li>進入<b>設定與活動</b> → <b>帳號中心</b> → <b>你的資訊和權限</b>。</li>
+    <li>點<b>下載你的資訊</b> → <b>下載或傳送資訊</b>，選擇你的 Instagram 帳號。</li>
+    <li>選<b>部分資訊</b>（自訂資訊），只勾選<b>追蹤者與追蹤中</b>。</li>
+    <li>匯出位置選<b>匯出到裝置</b>，<b>日期範圍</b>選<b>所有時間</b>，<b>格式</b>一定要選 <b>JSON</b>。</li>
+    <li>按<b>開始匯出</b>。通常幾分鐘到 1 小時內會收到通知與電子郵件。</li>
+    <li>收到通知後，在 <b>4 天內</b>下載 .zip 檔，直接上傳到上方即可（不用解壓縮）。</li>
+  </ol>
+  <p>選項名稱可能因 App 版本略有不同。若選到 HTML 格式，將無法分析。</p>
 </div>
 <footer>非 Instagram 或 Meta 官方工具 · 資料僅存在你的瀏覽器</footer>
 </main>
