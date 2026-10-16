@@ -207,12 +207,12 @@ function analyze(found,save=true){
 }
 
 const TABS=[
-  ["notBack","沒回追我","你追蹤他，但他沒追蹤你。日期 = 你追蹤他的時間。"],
-  ["fans","我沒回追","他追蹤你，但你沒追蹤他。日期 = 他追蹤你的時間。"],
+  ["notBack","對方未回追","你追蹤他，但他沒追蹤你。日期 = 你追蹤他的時間。"],
+  ["fans","我未回追","他追蹤你，但你沒追蹤他。日期 = 他追蹤你的時間。"],
   ["mutual","互相追蹤","你們互相追蹤中。"],
-  ["lost","退追你的人","與上次分析比對：上次是你的追蹤者，現在不是。"],
-  ["added","新追蹤你","與上次分析比對的新追蹤者。"],
-  ["unfollowed","我取消追蹤","來自 Instagram 官方紀錄的「最近取消追蹤」。"],
+  ["lost","流失追蹤者","與上次分析比對：上次是你的追蹤者，現在不是。"],
+  ["added","新增追蹤者","與上次分析比對的新追蹤者。"],
+  ["unfollowed","已取消追蹤","來自 Instagram 官方紀錄的「最近取消追蹤」。"],
   ["pending","待處理請求","還沒被接受的追蹤請求。"]
 ];
 
@@ -224,7 +224,7 @@ function countUp(el,to){
 
 let firstRender=true;
 function renderSummary(){
-  const items=[["追蹤者",data.followers.size],["追蹤中",data.following.size],["互相追蹤",data.mutual.length],["沒回追我",data.notBack.length]];
+  const items=[["追蹤者",data.followers.size],["追蹤中",data.following.size],["互相追蹤",data.mutual.length],["對方未回追",data.notBack.length]];
   $("sum").innerHTML=items.map(([l,v])=>`<div class="stat"><b data-v="${v}">0</b><span>${l}</span></div>`).join("");
   $("sum").querySelectorAll("b").forEach(b=>countUp(b,+b.dataset.v));
 }
