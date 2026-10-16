@@ -5,52 +5,124 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>IG 追蹤分析器</title>
 <style>
-:root{--bg:#fafafa;--fg:#1c1c1e;--mut:#6b6b70;--card:#fff;--line:#e4e4e7;--acc:#d6249f}
-@media (prefers-color-scheme:dark){:root{--bg:#111113;--fg:#f2f2f3;--mut:#9a9aa1;--card:#1c1c1f;--line:#2e2e33;--acc:#f06bc8}}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 -apple-system,"PingFang TC",sans-serif}
-main{max-width:760px;margin:0 auto;padding:24px 16px 64px}
-h1{font-size:1.6rem;margin:.2em 0}
-.sub{color:var(--mut);margin:0 0 20px}
-#drop{border:2px dashed var(--line);border-radius:14px;background:var(--card);padding:36px 16px;text-align:center;cursor:pointer}
-#drop.over{border-color:var(--acc)}
-#drop b{color:var(--acc)}
-.privacy{font-size:.85rem;color:var(--mut);margin-top:10px}
-.sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:20px 0}
-.sum div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
-.sum b{display:block;font-size:1.5rem}
-.sum span{color:var(--mut);font-size:.85rem}
-.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
-.tabs button{border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:999px;padding:6px 12px;font:inherit;font-size:.9rem;cursor:pointer}
-.tabs button.on{background:var(--acc);border-color:var(--acc);color:#fff}
-#q{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--fg);font:inherit;margin-bottom:8px}
-.desc{color:var(--mut);font-size:.9rem;margin:4px 0 8px}
-ul{list-style:none;padding:0;margin:0;background:var(--card);border:1px solid var(--line);border-radius:12px}
-li{display:flex;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--line)}
-li:last-child{border:0}
-li a{color:var(--fg);text-decoration:none;font-weight:500}
-li span{color:var(--mut);font-size:.85rem}
-.note{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:16px;font-size:.9rem;color:var(--mut)}
+:root{
+  --bg:#fafafa;--fg:#262626;--mut:#8e8e8e;--card:#fff;--line:#dbdbdb;--soft:#f2f2f2;
+  --grad:linear-gradient(45deg,#feda75,#fa7e1e 25%,#d62976 50%,#962fbf 75%,#4f5bd5);
+  --acc:#d62976;--blue:#0095f6;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#000;--fg:#f5f5f5;--mut:#a8a8a8;--card:#121212;--line:#262626;--soft:#1c1c1c;--acc:#ff4f9a}
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 -apple-system,BlinkMacSystemFont,"PingFang TC","Helvetica Neue",sans-serif;overflow-x:hidden}
+/* 背景漸層光暈 */
+.glow{position:fixed;inset:-20% -10% auto -10%;height:60vh;z-index:-1;filter:blur(90px);opacity:.28;
+  background:radial-gradient(circle at 20% 30%,#fa7e1e,transparent 40%),radial-gradient(circle at 60% 20%,#d62976,transparent 45%),radial-gradient(circle at 85% 40%,#4f5bd5,transparent 40%);
+  animation:drift 14s ease-in-out infinite alternate}
+@keyframes drift{to{transform:translate3d(4%,6%,0) scale(1.1)}}
+main{max-width:720px;margin:0 auto;padding:40px 16px 80px}
+
+header{text-align:center;margin-bottom:28px;animation:rise .7s both}
+.logo{width:68px;height:68px;margin:0 auto 14px;border-radius:20px;background:var(--grad);background-size:200% 200%;
+  display:grid;place-items:center;animation:shift 6s ease infinite,float 4s ease-in-out infinite;box-shadow:0 10px 30px rgba(214,41,118,.35)}
+.logo svg{width:34px;height:34px;stroke:#fff;fill:none;stroke-width:2}
+@keyframes shift{50%{background-position:100% 100%}}
+@keyframes float{50%{transform:translateY(-6px) rotate(-3deg)}}
+h1{font-size:2rem;margin:0;letter-spacing:-.5px;font-weight:800}
+h1 span{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--mut);margin:6px 0 0}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+/* 上傳區 */
+#drop{position:relative;border-radius:22px;padding:2px;background:var(--grad);background-size:300% 300%;animation:shift 8s linear infinite,rise .7s .1s both;cursor:pointer;transition:transform .25s}
+#drop:hover{transform:translateY(-3px)}
+#drop .in{background:var(--card);border-radius:20px;padding:40px 20px;text-align:center}
+#drop.over{transform:scale(1.02)}
+#drop.over .in{background:var(--soft)}
+.up{width:54px;height:54px;margin:0 auto 12px;border-radius:50%;background:var(--soft);display:grid;place-items:center;animation:pulse 2.4s ease-out infinite}
+.up svg{width:26px;height:26px;stroke:var(--acc);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(214,41,118,.35)}100%{box-shadow:0 0 0 22px rgba(214,41,118,0)}}
+.in b{font-weight:700}
+.privacy{font-size:.85rem;color:var(--mut);margin-top:8px}
+.demo{display:inline-block;margin-top:14px;border:0;background:var(--blue);color:#fff;border-radius:10px;padding:8px 16px;font:inherit;font-size:.9rem;font-weight:600;cursor:pointer;transition:transform .15s,opacity .15s}
+.demo:hover{opacity:.9}.demo:active{transform:scale(.95)}
+#err{color:#ed4956;margin-top:12px;text-align:center}
+.loader{display:none;width:28px;height:28px;margin:14px auto 0;border-radius:50%;border:3px solid var(--line);border-top-color:var(--acc);animation:spin .8s linear infinite}
+.loading .loader{display:block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* 統計 */
 .hidden{display:none}
-.err{color:#d33;margin-top:12px}
+.sum{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:26px 0 20px}
+@media(max-width:520px){.sum{grid-template-columns:repeat(2,1fr)}}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;text-align:center;animation:pop .6s both}
+.stat:nth-child(2){animation-delay:.08s}.stat:nth-child(3){animation-delay:.16s}.stat:nth-child(4){animation-delay:.24s}
+.stat b{display:block;font-size:1.7rem;font-weight:800;line-height:1.2}
+.stat:nth-child(4) b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat span{color:var(--mut);font-size:.8rem}
+@keyframes pop{from{opacity:0;transform:scale(.85) translateY(10px)}to{opacity:1;transform:none}}
+
+/* 分頁 */
+.tabs{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 10px;scrollbar-width:none;-webkit-mask:linear-gradient(90deg,#000 92%,transparent)}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{flex:none;border:0;background:var(--soft);color:var(--fg);border-radius:999px;padding:8px 14px;font:inherit;font-size:.88rem;font-weight:600;cursor:pointer;transition:all .25s;white-space:nowrap}
+.tabs button:hover{transform:translateY(-2px)}
+.tabs button.on{background:var(--grad);color:#fff;box-shadow:0 6px 16px rgba(214,41,118,.3)}
+.tabs button i{font-style:normal;opacity:.75;margin-left:4px;font-weight:500}
+
+.search{position:relative;margin:6px 0 10px}
+.search input{width:100%;padding:12px 16px 12px 42px;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--fg);font:inherit;outline:none;transition:border-color .2s,box-shadow .2s}
+.search input:focus{border-color:var(--acc);box-shadow:0 0 0 4px rgba(214,41,118,.12)}
+.search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:18px;height:18px;stroke:var(--mut);fill:none;stroke-width:2}
+.desc{color:var(--mut);font-size:.88rem;margin:6px 4px 10px;min-height:1.3em}
+
+/* 清單 */
+ul{list-style:none;padding:0;margin:0}
+li{animation:slide .45s both;margin-bottom:8px}
+@keyframes slide{from{opacity:0;transform:translateX(-18px)}to{opacity:1;transform:none}}
+li a{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--card);border:1px solid var(--line);border-radius:16px;color:var(--fg);text-decoration:none;transition:transform .2s,box-shadow .2s,border-color .2s}
+li a:hover{transform:translateX(6px);border-color:var(--acc);box-shadow:0 6px 18px rgba(214,41,118,.12)}
+.av{flex:none;width:44px;height:44px;border-radius:50%;padding:2px;background:var(--grad);display:grid;place-items:center}
+.av i{width:100%;height:100%;border-radius:50%;background:var(--card);display:grid;place-items:center;font-style:normal;font-weight:700;color:var(--acc);font-size:1.05rem;text-transform:uppercase}
+.nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.dt{color:var(--mut);font-size:.8rem;flex:none}
+.go{flex:none;color:var(--blue);font-weight:600;font-size:.82rem;opacity:0;transition:opacity .2s}
+li a:hover .go{opacity:1}
+.empty{text-align:center;color:var(--mut);padding:36px 0;animation:rise .5s both}
+.empty big{display:block;font-size:2.2rem}
+
+.note{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-top:18px;font-size:.88rem;color:var(--mut);animation:rise .7s .25s both}
+.note b{color:var(--fg)}
+footer{text-align:center;color:var(--mut);font-size:.78rem;margin-top:28px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
+<div class="glow"></div>
 <main>
-<h1>IG 追蹤分析器</h1>
-<p class="sub">找出誰沒回追你、你沒回追誰，以及退追紀錄。</p>
+<header>
+  <div class="logo"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5.5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r=".6" fill="#fff"/></svg></div>
+  <h1>IG <span>追蹤分析器</span></h1>
+  <p class="sub">誰沒回追你、你沒回追誰、誰默默退追，一次看清楚</p>
+</header>
 
 <div id="drop">
-  <div><b>點擊選擇</b>或拖曳 Instagram 匯出的 <b>.zip</b>（JSON 格式）到這裡</div>
-  <div class="privacy">🔒 檔案只在你的瀏覽器中處理，不會上傳到任何伺服器。</div>
+  <div class="in">
+    <div class="up"><svg viewBox="0 0 24 24"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"/></svg></div>
+    <div><b>點擊選擇</b>或拖曳 Instagram 匯出的 <b>.zip</b>（JSON 格式）</div>
+    <div class="privacy">🔒 檔案只在你的瀏覽器中處理，不會上傳到任何伺服器</div>
+    <button class="demo" id="demo" type="button">先用範例資料試玩</button>
+    <div class="loader"></div>
+  </div>
   <input id="file" type="file" accept=".zip,.json" multiple hidden>
 </div>
-<div id="err" class="err"></div>
+<div id="err"></div>
 
 <div id="result" class="hidden">
   <div class="sum" id="sum"></div>
   <div class="tabs" id="tabs"></div>
-  <input id="q" placeholder="搜尋帳號…">
+  <div class="search"><svg viewBox="0 0 24 24" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" placeholder="搜尋帳號…"></div>
   <div class="desc" id="desc"></div>
   <ul id="list"></ul>
   <div class="note" id="note"></div>
@@ -59,6 +131,7 @@ li span{color:var(--mut);font-size:.85rem}
 <div class="note">
   <b>如何取得檔案：</b>Instagram → 設定 → 帳號中心 → 你的資訊和權限 → 下載你的資訊 → 自訂資訊選「追蹤者與追蹤中」，日期「所有時間」，格式「<b>JSON</b>」。
 </div>
+<footer>非 Instagram 或 Meta 官方工具 · 資料僅存在你的瀏覽器</footer>
 </main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -81,7 +154,7 @@ function entries(obj){
 }
 
 async function readFiles(files){
-  const found={}; // basename -> [json]
+  const found={};
   const add=(name,text)=>{
     const base=name.split("/").pop();
     if(!base.endsWith(".json")||!/follow/i.test(name)) return;
@@ -105,7 +178,7 @@ const collect=(found,prefix)=>{
   return m;
 };
 
-function analyze(found){
+function analyze(found,save=true){
   const followers=collect(found,"followers"), following=collect(found,"following");
   if(!followers.size&&!following.size) throw new Error("找不到追蹤資料，請確認匯出格式是 JSON，且包含「追蹤者與追蹤中」。");
   const unf=collect(found,"recently_unfollowed"), pend=collect(found,"pending_follow_requests");
@@ -120,62 +193,104 @@ function analyze(found){
     lost:[],added:[],prevDate:null
   };
   let prev=null;
-  try{prev=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+  if(save){try{prev=JSON.parse(localStorage.getItem(KEY))}catch(e){}}
   if(prev){
     const pf=new Set(prev.followers);
     d.lost=prev.followers.filter(n=>!followers.has(n)).map(n=>[n,0]);
     d.added=[...followers.keys()].filter(n=>!pf.has(n)).map(n=>[n,0]);
     d.prevDate=prev.date;
   }
-  try{localStorage.setItem(KEY,JSON.stringify({date:new Date().toISOString().slice(0,10),followers:[...followers.keys()]}))}catch(e){}
+  if(save){try{localStorage.setItem(KEY,JSON.stringify({date:new Date().toISOString().slice(0,10),followers:[...followers.keys()]}))}catch(e){}}
   return d;
 }
 
 const TABS=[
   ["notBack","沒回追我","你追蹤他，但他沒追蹤你。日期 = 你追蹤他的時間。"],
   ["fans","我沒回追","他追蹤你，但你沒追蹤他。日期 = 他追蹤你的時間。"],
-  ["mutual","互相追蹤",""],
+  ["mutual","互相追蹤","你們互相追蹤中。"],
   ["lost","退追你的人","與上次分析比對：上次是你的追蹤者，現在不是。"],
   ["added","新追蹤你","與上次分析比對的新追蹤者。"],
   ["unfollowed","我取消追蹤","來自 Instagram 官方紀錄的「最近取消追蹤」。"],
-  ["pending","待處理請求",""]
+  ["pending","待處理請求","還沒被接受的追蹤請求。"]
 ];
 
-function render(){
-  $("result").classList.remove("hidden");
-  $("sum").innerHTML=[["追蹤者",data.followers.size],["追蹤中",data.following.size],["互相追蹤",data.mutual.length],["沒回追我",data.notBack.length]]
-    .map(([l,v])=>`<div><b>${v}</b><span>${l}</span></div>`).join("");
-  $("tabs").innerHTML=TABS.map(([k,l])=>`<button data-k="${k}" class="${k===tab?"on":""}">${l} ${data[k].length}</button>`).join("");
-  $("tabs").querySelectorAll("button").forEach(b=>b.onclick=()=>{tab=b.dataset.k;render()});
-  const t=TABS.find(x=>x[0]===tab);
-  $("desc").textContent=t[2];
+function countUp(el,to){
+  const t0=performance.now(),dur=900;
+  const step=t=>{const p=Math.min((t-t0)/dur,1);el.textContent=Math.round(to*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(step)};
+  requestAnimationFrame(step);
+}
+
+let firstRender=true;
+function renderSummary(){
+  const items=[["追蹤者",data.followers.size],["追蹤中",data.following.size],["互相追蹤",data.mutual.length],["沒回追我",data.notBack.length]];
+  $("sum").innerHTML=items.map(([l,v])=>`<div class="stat"><b data-v="${v}">0</b><span>${l}</span></div>`).join("");
+  $("sum").querySelectorAll("b").forEach(b=>countUp(b,+b.dataset.v));
+}
+
+function renderTabs(){
+  $("tabs").innerHTML=TABS.map(([k,l])=>`<button data-k="${k}" class="${k===tab?"on":""}">${l}<i>${data[k].length}</i></button>`).join("");
+  $("tabs").querySelectorAll("button").forEach(b=>b.onclick=()=>{tab=b.dataset.k;renderTabs();renderList()});
+}
+
+function renderList(){
+  $("desc").textContent=TABS.find(x=>x[0]===tab)[2];
   const q=$("q").value.trim().toLowerCase();
   const ul=$("list"); ul.innerHTML="";
   const rows=data[tab].filter(([n])=>n.toLowerCase().includes(q));
-  for(const [n,ts] of rows){
-    const li=document.createElement("li"), a=document.createElement("a"), s=document.createElement("span");
-    a.href="https://www.instagram.com/"+encodeURIComponent(n); a.target="_blank"; a.rel="noopener"; a.textContent="@"+n;
-    s.textContent=ts?new Date(ts*1000).toLocaleDateString("zh-TW"):"";
-    li.append(a,s); ul.append(li);
+  rows.forEach(([n,ts],i)=>{
+    const li=document.createElement("li");
+    li.style.animationDelay=Math.min(i,14)*35+"ms";
+    const a=document.createElement("a");
+    a.href="https://www.instagram.com/"+encodeURIComponent(n); a.target="_blank"; a.rel="noopener";
+    const av=document.createElement("div"); av.className="av";
+    const ini=document.createElement("i"); ini.textContent=n.replace(/[^\p{L}\p{N}]/gu,"").charAt(0)||"?"; av.append(ini);
+    const nm=document.createElement("span"); nm.className="nm"; nm.textContent="@"+n;
+    const dt=document.createElement("span"); dt.className="dt"; dt.textContent=ts?new Date(ts*1000).toLocaleDateString("zh-TW"):"";
+    const go=document.createElement("span"); go.className="go"; go.textContent="查看 ›";
+    a.append(av,nm,dt,go); li.append(a); ul.append(li);
+  });
+  if(!rows.length){
+    const e=document.createElement("div"); e.className="empty";
+    e.innerHTML=`<big>${q?"🔍":"✨"}</big>`;
+    e.append(q?"找不到符合的帳號":"這裡沒有資料"); ul.append(e);
   }
-  if(!rows.length){ul.innerHTML='<li><span>沒有資料</span></li>'}
-  $("note").textContent=data.prevDate
-    ? `退追比對基準：上次分析日期 ${data.prevDate}（存在你的瀏覽器中）。`
-    : "這是第一次分析，已把快照存在你的瀏覽器。之後匯出新檔案再上傳，就能看到退追者與新追蹤者。（清除瀏覽器資料會遺失快照。）";
+}
+
+function render(){
+  $("result").classList.remove("hidden");
+  renderSummary(); renderTabs(); renderList();
+  $("note").innerHTML=data.prevDate
+    ? `退追比對基準：上次分析日期 <b>${data.prevDate}</b>（存在你的瀏覽器中）。`
+    : "這是第一次分析，已把快照存在你的瀏覽器。之後匯出新檔案再上傳，就能看到<b>退追者與新追蹤者</b>。（清除瀏覽器資料會遺失快照。）";
+  $("result").scrollIntoView({behavior:"smooth",block:"start"});
 }
 
 async function handle(files){
-  $("err").textContent="";
+  $("err").textContent=""; $("drop").classList.add("loading");
   try{data=analyze(await readFiles([...files]));tab="notBack";render()}
   catch(e){$("err").textContent=e.message}
+  $("drop").classList.remove("loading");
 }
+
+// 範例資料（假帳號，不存快照）
+function demo(){
+  const mk=(n,t)=>({string_list_data:[{value:n,timestamp:t}]});
+  const base=1700000000, names=["coffee.lover","travel_tw","mia.chen","jason_88","daily.snap","foodie.amy","night.owl","lin_studio","kevin.run","hello.world","sunny_day","luna.art"];
+  const followers=names.filter((_,i)=>i%3!==0).map((n,i)=>mk(n,base+i*5e6));
+  const following=names.filter((_,i)=>i%4!==1).map((n,i)=>mk(n,base+i*4e6));
+  data=analyze({"followers_1.json":[followers],"following.json":[{relationships_following:following}]},false);
+  data.prevDate=null; tab="notBack"; render();
+  $("note").innerHTML="這是<b>範例資料</b>，不是真實帳號。";
+}
+
 const drop=$("drop");
-drop.onclick=()=>$("file").click();
+drop.onclick=e=>{if(e.target.id!=="demo")$("file").click()};
+$("demo").onclick=demo;
 $("file").onchange=e=>handle(e.target.files);
 drop.ondragover=e=>{e.preventDefault();drop.classList.add("over")};
 drop.ondragleave=()=>drop.classList.remove("over");
 drop.ondrop=e=>{e.preventDefault();drop.classList.remove("over");handle(e.dataTransfer.files)};
-$("q").oninput=()=>{if(data.followers)render()};
+$("q").oninput=()=>{if(data.followers)renderList()};
 </script>
 </body>
 </html>
