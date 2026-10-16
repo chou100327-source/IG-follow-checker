@@ -97,6 +97,16 @@ li a:hover .go{opacity:1}
 
 .note{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-top:18px;font-size:.88rem;color:var(--mut);animation:rise .7s .25s both}
 .note b{color:var(--fg)}
+/* Google 登入同步 */
+.auth{display:flex;flex-direction:column;align-items:center;gap:6px;margin:0 0 18px;animation:rise .7s .05s both}
+.auth .row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center}
+.gbtn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:999px;padding:8px 16px;font:inherit;font-size:.88rem;font-weight:600;cursor:pointer;transition:transform .2s,box-shadow .2s}
+.gbtn:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.12)}
+.gbtn b{width:20px;height:20px;border-radius:50%;background:#fff;color:#4285f4;display:grid;place-items:center;font-size:.85rem;border:1px solid #e4e4e7}
+.gbtn.mini{padding:5px 12px;font-size:.78rem;font-weight:500;color:var(--mut)}
+.auth img{width:28px;height:28px;border-radius:50%}
+.auth .who{font-size:.86rem;font-weight:600}
+.auth .st{font-size:.78rem;color:var(--mut);text-align:center;max-width:460px}
 /* 詳細教學 */
 .guide{margin-top:12px;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;animation:rise .7s .3s both}
 .guide summary{list-style:none;cursor:pointer;padding:14px 16px;font-weight:700;display:flex;align-items:center;justify-content:space-between;transition:background .2s}
@@ -146,11 +156,13 @@ footer{text-align:center;color:var(--mut);font-size:.78rem;margin-top:28px}
   <p class="sub">誰沒回追你、你沒回追誰、誰默默退追，一次看清楚</p>
 </header>
 
+<div id="auth" class="auth hidden"></div>
+
 <div id="drop">
   <div class="in">
     <div class="up"><svg viewBox="0 0 24 24"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"/></svg></div>
     <div><b>點擊選擇</b>或拖曳 Instagram 匯出的 <b>.zip</b>（JSON 格式）</div>
-    <div class="privacy">🔒 檔案只在你的瀏覽器中處理，不會上傳到任何伺服器</div>
+    <div class="privacy">🔒 匯出檔只在你的瀏覽器中處理，不會上傳；僅在你登入同步時，才會儲存追蹤者帳號清單</div>
     <button class="demo" id="demo" type="button">先用範例資料試玩</button>
     <div class="loader"></div>
   </div>
@@ -202,7 +214,7 @@ footer{text-align:center;color:var(--mut);font-size:.78rem;margin-top:28px}
     <h3><i>3</i>上傳分析</h3>
     <ul>
       <li>把下載的 <b>.zip 直接拖進頁面最上方的上傳框</b>，或點一下選擇檔案。<b>不用解壓縮</b>。</li>
-      <li>幾秒內就會顯示結果。檔案只在你的瀏覽器中處理，<b>不會上傳到任何伺服器</b>。</li>
+      <li>幾秒內就會顯示結果。匯出檔只在你的瀏覽器中處理，<b>不會上傳</b>。</li>
     </ul>
 
     <h3><i>4</i>怎麼看結果</h3>
@@ -223,12 +235,12 @@ footer{text-align:center;color:var(--mut);font-size:.78rem;margin-top:28px}
       <li>過一段時間（建議每週或每月）重新匯出，再上傳一次。</li>
       <li>工具會和上次比對，列出<b>流失追蹤者</b>與<b>新增追蹤者</b>。</li>
     </ol>
-    <div class="tip"><b>注意：</b>快照存在你的瀏覽器裡。請固定用同一台裝置、同一個瀏覽器，清除網站資料會讓快照消失。</div>
+    <div class="tip"><b>換裝置也想比對？</b>點頁面最上方的「使用 Google 登入同步」。登入後，歷史紀錄會同步到雲端，手機與電腦都能接續比對。不登入的話，紀錄只存在目前的瀏覽器，清除網站資料就會消失。</div>
 
     <h3><i>6</i>常見問題</h3>
     <dl>
       <dt>會不會需要我的 Instagram 密碼？</dt><dd>不會。本工具完全不需要登入你的帳號。</dd>
-      <dt>我的資料安全嗎？</dt><dd>檔案只在你自己的瀏覽器中處理，不會傳到任何伺服器。</dd>
+      <dt>我的資料安全嗎？</dt><dd>匯出檔本身只在你的瀏覽器中處理，不會上傳。若你選擇 Google 登入同步，雲端只會存「追蹤者帳號 ID 清單」，只有你本人能讀取，並可隨時按「刪除雲端資料」清除。</dd>
       <dt>顯示「找不到追蹤資料」？</dt><dd>多半是格式選成 HTML，或沒勾選「追蹤者與追蹤中」。請重新匯出，格式選 JSON。</dd>
       <dt>數字和 Instagram 主頁差 1～2 個？</dt><dd>通常是已停用或被封鎖的帳號，屬於正常現象。</dd>
       <dt>帳號名稱顯示的是 ID，不是暱稱？</dt><dd>Instagram 匯出的追蹤名單只有帳號 ID，沒有暱稱與頭貼。</dd>
@@ -249,12 +261,71 @@ footer{text-align:center;color:var(--mut);font-size:.78rem;margin-top:28px}
 <a class="ig" href="https://www.instagram.com/mu_3.27" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5.5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r=".6" fill="currentColor"/></svg>@mu_3.27</a><div class="fine">獨立開發之工具，與 Instagram 及 Meta 無關 · 資料僅於本機瀏覽器處理</div></footer>
 </main>
 
+<script src="firebase-config.js"></script>
+<script type="module" src="cloud.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
 const $=id=>document.getElementById(id);
 const fix=s=>{try{return decodeURIComponent(escape(s))}catch(e){return s}};
 const KEY="ig-follow-snapshot-v1";
 let data={}, tab="notBack";
+let cloudUser=null, cloudSnaps=[], cloudLoaded=Promise.resolve(), authMsg="";
+const ymd=()=>{const d=new Date(),p=n=>String(n).padStart(2,"0");return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`};
+const pickPrev=snaps=>snaps.find(x=>x.date!==ymd())||snaps[0]||null;
+function renderAuth(){
+  const box=$("auth");
+  if(!window.cloud){box.classList.add("hidden");return}
+  box.classList.remove("hidden");
+  if(!cloudUser){
+    box.innerHTML='<div class="row"><button class="gbtn" id="gin" type="button"><b>G</b>使用 Google 登入，跨手機與電腦同步</button></div><div class="st">選用功能。不登入也能正常使用，歷史紀錄就只存在這個瀏覽器。</div>';
+    $("gin").onclick=signIn;return;
+  }
+  const last=cloudSnaps[0]?cloudSnaps[0].date:"尚無紀錄";
+  box.innerHTML=`<div class="row">${cloudUser.photoURL?`<img src="${cloudUser.photoURL}" alt="" referrerpolicy="no-referrer">`:""}<span class="who"></span><button class="gbtn mini" id="gout" type="button">登出</button><button class="gbtn mini" id="gdel" type="button">刪除雲端資料</button></div><div class="st"></div>`;
+  box.querySelector(".who").textContent=cloudUser.displayName||cloudUser.email||"已登入";
+  box.querySelector(".st").textContent=authMsg||`☁️ 已啟用同步・最近一次紀錄：${last}。雲端只存「追蹤者帳號清單」，只有你本人讀得到。`;
+  $("gout").onclick=()=>window.cloud.signOut();
+  $("gdel").onclick=async()=>{
+    if(!confirm("確定刪除雲端上所有歷史紀錄嗎？此動作無法復原。"))return;
+    try{await window.cloud.wipe();cloudSnaps=[];authMsg="已刪除雲端資料。";}catch(e){authMsg="刪除失敗，請稍後再試。"}
+    renderAuth();
+  };
+}
+async function signIn(){
+  let ok=false;try{ok=localStorage.getItem("ig-cloud-consent")==="1"}catch(e){}
+  if(!ok){
+    if(!confirm("登入後，工具會把你的「追蹤者帳號 ID 清單」（只有帳號名稱，不含其他資料）存到雲端，用來在不同裝置比對誰退追你。\n\n原始匯出檔不會上傳，你可以隨時按「刪除雲端資料」。\n\n要繼續嗎？"))return;
+    try{localStorage.setItem("ig-cloud-consent","1")}catch(e){}
+  }
+  try{await window.cloud.signIn()}catch(e){authMsg="登入未完成。";renderAuth()}
+}
+function initCloud(){
+  if(!window.cloud){renderAuth();return}
+  window.cloud.onAuth(u=>{
+    cloudUser=u;authMsg="";cloudSnaps=[];renderAuth();
+    if(!u)return;
+    cloudLoaded=(async()=>{
+      try{
+        cloudSnaps=await window.cloud.list();
+        if(!cloudSnaps.length){ // 第一次登入：把本機快照搬上雲端
+          let loc=null;try{loc=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+          if(loc&&loc.followers){const sn={date:loc.date,followers:loc.followers};await window.cloud.save(sn);cloudSnaps=[sn];authMsg="已把本機的歷史紀錄同步到雲端。"}
+        }
+      }catch(e){authMsg="雲端讀取失敗，暫時使用本機紀錄。"}
+      renderAuth();
+    })();
+  });
+}
+async function pushCloud(followers){
+  if(!cloudUser||!window.cloud)return;
+  const sn={date:ymd(),followers};
+  try{await window.cloud.save(sn);cloudSnaps=[sn,...cloudSnaps.filter(x=>x.date!==sn.date)];authMsg="";}
+  catch(e){authMsg="雲端儲存失敗，這次紀錄只存在本機。"}
+  renderAuth();
+}
+window.addEventListener("cloud-ready",initCloud);
+if(window.cloud)initCloud();
+
 const NKEY="ig-names-v1";
 let names={};
 try{names=JSON.parse(localStorage.getItem(NKEY))||{}}catch(e){}
@@ -328,14 +399,14 @@ function analyze(found,save=true){
     lost:[],added:[],prevDate:null
   };
   let prev=null;
-  if(save){try{prev=JSON.parse(localStorage.getItem(KEY))}catch(e){}}
+  if(save){prev=cloudUser?pickPrev(cloudSnaps):null;if(!prev){try{prev=JSON.parse(localStorage.getItem(KEY))}catch(e){}}}
   if(prev){
     const pf=new Set(prev.followers);
     d.lost=prev.followers.filter(n=>!followers.has(n)).map(n=>[n,0]);
     d.added=[...followers.keys()].filter(n=>!pf.has(n)).map(n=>[n,0]);
     d.prevDate=prev.date;
   }
-  if(save){try{localStorage.setItem(KEY,JSON.stringify({date:new Date().toISOString().slice(0,10),followers:[...followers.keys()]}))}catch(e){}}
+  if(save){try{localStorage.setItem(KEY,JSON.stringify({date:ymd(),followers:[...followers.keys()]}))}catch(e){}pushCloud([...followers.keys()])}
   return d;
 }
 
@@ -399,13 +470,13 @@ function render(){
   renderSummary(); renderTabs(); renderList();
   $("note").innerHTML=data.prevDate
     ? `退追比對基準：上次分析日期 <b>${data.prevDate}</b>（存在你的瀏覽器中）。`
-    : "這是第一次分析，已把快照存在你的瀏覽器。之後匯出新檔案再上傳，就能看到<b>退追者與新追蹤者</b>。（清除瀏覽器資料會遺失快照。）";
+    : "這是第一次分析，已把快照存在你的瀏覽器。之後匯出新檔案再上傳，就能看到<b>退追者與新追蹤者</b>。（想跨手機與電腦使用，請用上方 Google 登入同步。）";
   $("result").scrollIntoView({behavior:"smooth",block:"start"});
 }
 
 async function handle(files){
   $("err").textContent=""; $("drop").classList.add("loading");
-  try{data=analyze(await readFiles([...files]));tab="notBack";render()}
+  try{const found=await readFiles([...files]);await cloudLoaded;data=analyze(found);tab="notBack";render()}
   catch(e){$("err").textContent=e.message}
   $("drop").classList.remove("loading");
 }
