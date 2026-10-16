@@ -312,15 +312,23 @@ async function handle(files){
   $("drop").classList.remove("loading");
 }
 
-// 範例資料（假帳號，不存快照）
+// 範例資料（全部是虛構帳號，不存快照）
 function demo(){
   const mk=(n,t)=>({string_list_data:[{value:n,timestamp:t}]});
-  const base=1700000000, names=["coffee.lover","travel_tw","mia.chen","jason_88","daily.snap","foodie.amy","night.owl","lin_studio","kevin.run","hello.world","sunny_day","luna.art"];
+  const base=1700000000, DAY=86400;
+  const names=["coffee.lover","travel_tw","mia.chen","jason_88","daily.snap","foodie.amy","night.owl","lin_studio","kevin.run","hello.world","sunny_day","luna.art"];
   const followers=names.filter((_,i)=>i%3!==0).map((n,i)=>mk(n,base+i*5e6));
   const following=names.filter((_,i)=>i%4!==1).map((n,i)=>mk(n,base+i*4e6));
   data=analyze({"followers_1.json":[followers],"following.json":[{relationships_following:following}]},false);
-  data.prevDate=null; tab="notBack"; render();
-  $("note").innerHTML="這是<b>範例資料</b>，不是真實帳號。";
+  const now=Math.floor(Date.now()/1000);
+  const list=(arr)=>arr.map(([n,d])=>[n,now-d*DAY]);
+  data.lost=list([["old.friend_99",12],["gym.buddy",30],["shop_official_tw",45]]);
+  data.added=list([["new.follower01",1],["photo.daily",3],["travel.mate",6],["cafe_hunter",9]]);
+  data.unfollowed=list([["spam.deals",5],["random.promo",14],["brand.store",40]]);
+  data.pending=list([["private.user_a",2],["private.user_b",8]]);
+  data.prevDate=new Date(Date.now()-14*DAY*1000).toISOString().slice(0,10);
+  tab="notBack"; render();
+  $("note").innerHTML="這是<b>範例資料</b>（全為虛構帳號），用來展示各分頁功能。「流失追蹤者」與「新增追蹤者」需要你上傳過兩次匯出檔才會有真實資料。";
 }
 
 const drop=$("drop");
