@@ -37,18 +37,30 @@ def load_sources(path):
     return out
 
 def entries(obj):
-    """從各種格式取出 [(username, timestamp, href)]"""
+    """從各種格式取出 [(username, timestamp, href, displayname)]
+    格式 A: string_list_data（followers / following）
+    格式 B: label_values（close_friends / pending / recently_unfollowed 等，含顯示名稱）"""
     items = obj
     if isinstance(obj, dict):
         items = next((v for v in obj.values() if isinstance(v, list)), [])
     res = []
     for it in items:
+        if "label_values" in it:
+            user = dn = ""
+            for lv in it["label_values"]:
+                lab, val = fix(lv.get("label", "")), fix(lv.get("value", ""))
+                if lab == "用戶名稱":
+                    user = val.strip()
+                elif lab == "名稱":
+                    dn = val.strip()
+            if user:
+                res.append((user, it.get("timestamp", 0), f"https://www.instagram.com/{user}", dn))
+            continue
         sld = (it.get("string_list_data") or [{}])[0]
-        name = sld.get("value") or it.get("title") or ""
-        name = fix(name).strip()
+        name = fix(sld.get("value") or it.get("title") or "").strip()
         if not name:
             continue
-        res.append((name, sld.get("timestamp", 0), sld.get("href", f"https://www.instagram.com/{name}")))
+        res.append((name, sld.get("timestamp", 0), sld.get("href", f"https://www.instagram.com/{name}"), ""))
     return res
 
 def collect(src, prefix):
@@ -56,9 +68,19 @@ def collect(src, prefix):
     for fname, lst in src.items():
         if fname.startswith(prefix):
             for obj in lst:
-                for n, ts, href in entries(obj):
+                for n, ts, href, _ in entries(obj):
                     data[n] = (ts, href)
     return data
+
+def display_names(src):
+    """從匯出檔中撈出已知的顯示名稱 {username: name}"""
+    out = {}
+    for fname, lst in src.items():
+        for obj in lst:
+            for n, _, _, dn in entries(obj):
+                if dn and dn != n:
+                    out[n] = dn
+    return out
 
 def fmt(ts):
     return datetime.fromtimestamp(ts).strftime("%Y-%m-%d") if ts else "-"
