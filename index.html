@@ -98,9 +98,16 @@ li a:hover .go{opacity:1}
 .note b{color:var(--fg)}
 footer .credit{font-size:.92rem;letter-spacing:.06em;color:var(--fg);opacity:.85}
 footer .credit span{font-weight:700;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
-footer .ig{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:7px 16px;border-radius:999px;background:var(--grad);background-size:200% 200%;color:#fff;font-weight:600;font-size:.85rem;text-decoration:none;box-shadow:0 6px 16px rgba(214,41,118,.3);transition:transform .2s,box-shadow .2s}
-footer .ig:hover{transform:translateY(-3px);box-shadow:0 10px 22px rgba(214,41,118,.4);animation:shift 3s ease infinite}
-footer .ig svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2}
+footer .me{display:inline-flex;align-items:center;gap:12px;margin-top:14px;padding:10px 12px 10px 10px;border-radius:18px;background:var(--card);border:1px solid var(--line);color:var(--fg);text-decoration:none;text-align:left;transition:transform .25s,box-shadow .25s,border-color .25s}
+footer .me:hover{transform:translateY(-4px);border-color:var(--acc);box-shadow:0 12px 26px rgba(214,41,118,.18)}
+.mav{position:relative;flex:none;width:52px;height:52px;border-radius:50%;padding:2.5px;background:var(--grad);background-size:200% 200%;animation:shift 5s ease infinite;display:block}
+.mav img,.mav .mi{position:absolute;inset:2.5px;width:calc(100% - 5px);height:calc(100% - 5px);border-radius:50%;object-fit:cover;border:2px solid var(--card)}
+.mav .mi{display:grid;place-items:center;background:var(--soft);color:var(--acc);font-weight:800;font-size:1.2rem;border:0}
+.mt{display:flex;flex-direction:column;line-height:1.3}
+.mt b{font-size:1rem}
+.mt small{color:var(--mut);font-size:.78rem}
+.mb{margin-left:6px;background:var(--blue);color:#fff;border-radius:9px;padding:6px 16px;font-size:.85rem;font-weight:600;transition:opacity .2s}
+footer .me:hover .mb{opacity:.88}
 footer .fine{margin-top:4px;font-size:.72rem}
 .how ol{margin:10px 0 8px;padding-left:1.3em}
 .how li{display:list-item;animation:none;margin:0 0 6px;color:var(--fg)}
@@ -148,7 +155,11 @@ footer{text-align:center;color:var(--mut);font-size:.78rem;margin-top:28px}
   </ol>
 </div>
 <footer><div class="credit">Designed &amp; Developed by <span>周睦承</span></div>
-<a class="ig" href="https://www.instagram.com/mu_3.27" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5.5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r=".6" fill="currentColor"/></svg>@mu_3.27</a><div class="fine">獨立開發之工具，與 Instagram 及 Meta 無關 · 資料僅於本機瀏覽器處理</div></footer>
+<a class="me" href="https://www.instagram.com/mu_3.27" target="_blank" rel="noopener">
+  <span class="mav"><span class="mi">睦</span><img src="avatar.jpg" alt="周睦承" onerror="this.remove()"></span>
+  <span class="mt"><b>周睦承</b><small>@mu_3.27 · Instagram</small></span>
+  <span class="mb">追蹤</span>
+</a><div class="fine">獨立開發之工具，與 Instagram 及 Meta 無關 · 資料僅於本機瀏覽器處理</div></footer>
 </main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
