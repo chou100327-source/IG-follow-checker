@@ -49,7 +49,7 @@ header{text-align:center;margin-bottom:28px;animation:rise .7s both}
 @keyframes float{50%{transform:translateY(-6px) rotate(-3deg)}}
 h1{font-size:2rem;margin:0;letter-spacing:-.5px;font-weight:800}
 h1 span{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
-.sub{color:var(--mut);margin:6px 0 0}
+.sub{color:var(--mut);margin:6px 0 0;text-wrap:balance}
 @keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 
 /* 上傳區 */
@@ -64,10 +64,13 @@ h1 span{background:var(--grad);-webkit-background-clip:text;background-clip:text
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(214,41,118,.35)}100%{box-shadow:0 0 0 22px rgba(214,41,118,0)}}
 .in b{font-weight:700}
 .privacy{font-size:.85rem;color:var(--mut);margin-top:8px}
-.demo{display:inline-block;margin:14px 0 8px;min-height:40px;border:0;background:var(--blue);color:#fff;border-radius:10px;padding:8px 16px;font:inherit;font-size:.9rem;font-weight:600;cursor:pointer;transition:transform .15s,opacity .15s}
+.demo{display:inline-block;margin:16px 0 0;min-height:40px;border:0;background:var(--blue);color:#fff;border-radius:10px;padding:8px 16px;font:inherit;font-size:.9rem;font-weight:600;cursor:pointer;transition:transform .15s,opacity .15s}
 .demo:hover{opacity:.9}.demo:active{transform:scale(.95)}
-.linkbtn{display:block;margin:4px auto 0;padding:10px 14px;min-height:40px;border:0;background:none;color:var(--mut);font:inherit;font-size:.82rem;text-decoration:underline;cursor:pointer}
-.linkbtn:hover{color:var(--acc)}
+.lead{font-size:1.02rem}
+.opts{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin:14px 0 0;animation:rise .7s .2s both}
+.opt{min-height:40px;padding:8px 14px;border:1px solid var(--line);background:var(--card);color:var(--mut);border-radius:999px;font:inherit;font-size:.84rem;cursor:pointer;transition:color .2s,border-color .2s,transform .2s}
+.opt:hover{color:var(--acc);border-color:var(--acc);transform:translateY(-2px)}
+@media(max-width:420px){.opts{gap:6px}.opt{padding:8px 11px;font-size:.8rem}}
 #msg{margin-top:12px;text-align:center;font-size:.9rem;color:var(--err)}
 #msg.ok{color:var(--ok)}
 .loader{display:none;width:28px;height:28px;margin:14px auto 0;border-radius:50%;border:3px solid var(--line);border-top-color:var(--acc);animation:spin .8s linear infinite}
@@ -175,17 +178,19 @@ footer .fine a{color:inherit;text-decoration:underline;display:inline-block;padd
 <div id="drop" role="button" tabindex="0" aria-label="選擇或拖曳 Instagram 匯出檔以上傳">
   <div class="in">
     <div class="up"><svg viewBox="0 0 24 24"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"/></svg></div>
-    <div><b>點擊選擇</b>或拖曳 Instagram 匯出的 <b>.zip</b>（JSON 格式）</div>
-    <div class="privacy">🔒 匯出檔只在你的瀏覽器中處理，不會上傳</div>
+    <div class="lead"><b>點擊選擇</b>或拖曳 Instagram 匯出的 <b>.zip</b></div>
+    <div class="privacy">🔒 檔案只在你的瀏覽器中處理，不會上傳</div>
     <button class="demo" id="demo" type="button" data-nopick>先用範例資料試玩</button>
-    <button class="linkbtn" id="dirbtn" type="button" data-nopick>已解壓縮成資料夾？選擇資料夾</button>
-    <button class="linkbtn" id="himp" type="button" data-nopick>已有歷史紀錄檔？匯入</button>
-    <button class="linkbtn" id="clr" type="button" data-nopick>要換分析另一個帳號？清除已儲存的資料</button>
     <div class="loader"></div>
   </div>
   <input id="file" type="file" accept=".zip,.json" multiple hidden>
   <input id="hfile" type="file" accept=".json" hidden>
   <input id="dfile" type="file" webkitdirectory multiple hidden>
+</div>
+<div class="opts" role="group" aria-label="其他選項">
+  <button class="opt" id="dirbtn" type="button" title="Safari 已自動解壓縮成資料夾時使用">📁 選擇資料夾</button>
+  <button class="opt" id="himp" type="button" title="匯入先前下載的歷史紀錄檔，用來比對誰退追">💾 匯入歷史紀錄</button>
+  <button class="opt" id="clr" type="button" title="換分析另一個帳號前，清除已儲存的紀錄">🗑 清除資料</button>
 </div>
 <div id="msg" role="status" aria-live="polite"></div>
 
@@ -251,7 +256,7 @@ footer .fine a{color:inherit;text-decoration:underline;display:inline-block;padd
       <li>把下載的 <b>.zip 直接拖進頁面最上方的上傳框</b>，或點一下選擇檔案。<b>不用解壓縮</b>。</li>
       <li>幾秒內就會顯示結果。匯出檔只在你的瀏覽器中處理，<b>不會上傳</b>。</li>
     </ul>
-    <div class="tip"><b>Mac 的 Safari 會自動解壓縮？</b>Safari 預設會把下載的 zip 自動解壓縮並刪掉 zip。這時可以把<b>解壓縮後的資料夾直接拖進上傳框</b>，或按上傳框下方的「<b>已解壓縮成資料夾？選擇資料夾</b>」，選那個資料夾即可。</div>
+    <div class="tip"><b>Mac 的 Safari 會自動解壓縮？</b>Safari 預設會把下載的 zip 自動解壓縮並刪掉 zip。這時可以把<b>解壓縮後的資料夾直接拖進上傳框</b>，或按上傳框下方的「<b>📁 選擇資料夾</b>」，選那個資料夾即可。</div>
     <div class="tip"><b>iPhone 使用者注意：</b>下載後請<b>不要點開 zip</b>，否則會被自動解壓縮成資料夾。如果已經解壓縮了，上傳時進入 <b>connections → followers_and_following</b> 資料夾，<b>同時選取 followers_1.json 和 following.json</b> 兩個檔案（可複選）即可。想看「已取消追蹤」和「待處理請求」，可以再一併選取 recently_unfollowed_profiles.json、pending_follow_requests.json。</div>
 
     <h2><i>4</i>怎麼看結果</h2>
@@ -274,9 +279,9 @@ footer .fine a{color:inherit;text-decoration:underline;display:inline-block;padd
       <li>過一段時間（建議每週或每月）重新匯出，再上傳一次。</li>
       <li>工具會和上次比對，列出<b>流失追蹤者</b>與<b>新增追蹤者</b>。</li>
     </ol>
-    <div class="tip"><b>換裝置或想備份？</b>在結果頁下方按「<b>下載歷史紀錄</b>」，會得到一個很小的檔案（內含追蹤者帳號清單與忽略名單，請自行妥善保管）。到新裝置後，在上傳框下方按「<b>已有歷史紀錄檔？匯入</b>」，再上傳新的匯出檔，就能接續比對。</div>
+    <div class="tip"><b>換裝置或想備份？</b>在結果頁下方按「<b>下載歷史紀錄</b>」，會得到一個很小的檔案（內含追蹤者帳號清單與忽略名單，請自行妥善保管）。到新裝置後，在上傳框下方按「<b>匯入歷史紀錄</b>」，再上傳新的匯出檔，就能接續比對。</div>
     <div class="tip">歷史紀錄存在瀏覽器裡，清除網站資料或長時間不使用（部分瀏覽器會自動清理）可能會消失，建議定期下載備份。</div>
-    <div class="tip"><b>要換分析另一個帳號？</b>先按上傳框下方的「<b>要換分析另一個帳號？清除已儲存的資料</b>」（結果頁下方也有「🗑 清除所有資料」），會一併清掉歷史紀錄、忽略名單與已存的名稱。清除前想保留的話，記得先「下載歷史紀錄」。</div>
+    <div class="tip"><b>要換分析另一個帳號？</b>先按上傳框下方的「<b>清除資料</b>」（結果頁下方也有「🗑 清除所有資料」），會一併清掉歷史紀錄、忽略名單與已存的名稱。清除前想保留的話，記得先「下載歷史紀錄」。</div>
 
     <h2><i>6</i>常見問題</h2>
     <dl>
