@@ -176,6 +176,7 @@ footer .fine{margin-top:4px;font-size:.72rem}
     <div class="privacy">🔒 匯出檔只在你的瀏覽器中處理，不會上傳</div>
     <button class="demo" id="demo" type="button" data-nopick>先用範例資料試玩</button>
     <button class="linkbtn" id="himp" type="button" data-nopick>已有歷史紀錄檔？匯入</button>
+    <button class="linkbtn" id="clr" type="button" data-nopick>要換分析另一個帳號？清除已儲存的資料</button>
     <div class="loader"></div>
   </div>
   <input id="file" type="file" accept=".zip,.json" multiple hidden>
@@ -201,6 +202,7 @@ footer .fine{margin-top:4px;font-size:.72rem}
   <ul id="list"></ul>
   <div class="hist" id="hist">
     <button class="sbtn" id="hdl" type="button">💾 下載歷史紀錄</button>
+    <button class="sbtn" id="clr2" type="button">🗑 清除所有資料</button>
     <span>換裝置或想備份時使用，在新裝置的上傳框下方按「匯入」即可。</span>
   </div>
   <div class="note" id="note"></div>
@@ -272,6 +274,7 @@ footer .fine{margin-top:4px;font-size:.72rem}
     <dl>
       <dt>會不會需要我的 Instagram 密碼？</dt><dd>不會。本工具完全不需要登入你的帳號。</dd>
       <dt>我的資料安全嗎？</dt><dd>匯出檔只在你自己的瀏覽器中處理，不會上傳到任何伺服器。網站只會用不含 cookie 的方式匿名統計造訪人次，不會讀取你的檔案內容。</dd>
+      <dt>想換一個帳號分析（例如朋友的）？</dt><dd>歷史紀錄是跟著「這個瀏覽器」存的，不分帳號。換帳號前請在上傳框下方按「<b>清除已儲存的資料</b>」，免得兩個帳號的紀錄混在一起。如果你忘了清，上傳時工具發現追蹤者差異很大，也會詢問你是否要重新開始。</dd>
       <dt>顯示「找不到追蹤資料」？</dt><dd>多半是格式選成 HTML，或沒勾選「追蹤者與追蹤中」。請重新匯出，格式選 JSON。</dd>
       <dt>數字和 Instagram 主頁差 1～2 個？</dt><dd>通常是已停用或被封鎖的帳號，屬於正常現象。</dd>
       <dt>帳號名稱顯示的是 ID，不是暱稱？</dt><dd>Instagram 匯出的追蹤名單只有帳號 ID，沒有暱稱與頭貼。部分帳號（例如密友、追蹤請求）的檔案裡有名稱，會自動顯示。</dd>
@@ -292,7 +295,7 @@ footer .fine{margin-top:4px;font-size:.72rem}
 </main>
 
 <script data-goatcounter="https://igtracker.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" integrity="sha512-XMVd28F1oH/O71fzwBnV7HucLxVwtxf26XV8P4wPk26EDxuGZ91N8bsOttmnomcCD3CS5ZMRL50H0GgOHvegtg==" crossorigin="anonymous"></script>
 <script>
 const $=id=>document.getElementById(id);
 const fix=s=>{try{return decodeURIComponent(escape(s))}catch(e){return s}};
@@ -309,6 +312,7 @@ const saveIgnored=()=>{if(!demoMode)store.set(IKEY,[...ignored])};
 const setMsg=(t,ok=false)=>{const m=$("msg");m.textContent=t;m.className=ok?"ok":""};
 
 /* ---------- 解析 ---------- */
+const USER_LABELS=["用戶名稱","用户名","用户名称","Username","username"], NAME_LABELS=["名稱","名称","Name","name"];
 function entries(obj){
   let items=obj;
   if(obj&&!Array.isArray(obj)) items=Object.values(obj).find(Array.isArray)||[];
@@ -316,9 +320,15 @@ function entries(obj){
   for(const it of items){
     if(it.label_values){
       let user="",dn="";
-      for(const lv of it.label_values){
-        const lab=fix(lv.label||""),val=fix(lv.value||"");
-        if(lab==="用戶名稱")user=val.trim(); else if(lab==="名稱")dn=val.trim();
+      const lv=it.label_values;
+      for(const x of lv){
+        const lab=fix(x.label||""),val=fix(x.value||"");
+        if(USER_LABELS.includes(lab))user=val.trim(); else if(NAME_LABELS.includes(lab))dn=val.trim();
+      }
+      // 備援：標籤語言不認得時，依固定順序（網址、名稱、用戶名稱）取最後一項當帳號
+      if(!user&&lv.length>=3){
+        const v=fix(lv[lv.length-1].value||"").trim();
+        if(/^[A-Za-z0-9._]{1,30}$/.test(v)){user=v;if(!dn)dn=fix(lv[1].value||"").trim()}
       }
       if(user) out.push([user,it.timestamp||0,dn]);
       continue;
@@ -339,6 +349,7 @@ async function readFiles(files){
   };
   for(const f of files){
     if(f.name.endsWith(".zip")){
+      if(f.size>400*1024*1024) throw new Error(`這個檔案很大（約 ${Math.round(f.size/1048576)} MB），可能連照片或訊息一起匯出了，瀏覽器可能會當機。請重新匯出，只勾選「追蹤者與追蹤中」。`);
       const z=await JSZip.loadAsync(f);
       for(const n of Object.keys(z.files)){
         if(!z.files[n].dir&&/follow/i.test(n)&&n.endsWith(".json")) add(n,await z.files[n].async("string"));
@@ -355,9 +366,27 @@ const collect=(found,prefix)=>{
   return m;
 };
 
+function wipeStored(){
+  try{[KEY,IKEY,NKEY].forEach(k=>localStorage.removeItem(k))}catch(e){}
+  ignored=new Set(); names={};
+}
 function analyze(found,save=true){
   const followers=collect(found,"followers"), following=collect(found,"following");
   if(!followers.size&&!following.size) throw new Error("找不到追蹤資料，請確認匯出格式是 JSON，且包含「追蹤者與追蹤中」。");
+  let prev=save?store.get(KEY):null;
+  if(prev&&!Array.isArray(prev.followers)) prev=null;
+  // 偵測是否換了帳號：和上次的追蹤者幾乎不重疊，很可能不是同一個人
+  if(prev){
+    const pf=new Set(prev.followers);
+    let inter=0; for(const n of followers.keys()) if(pf.has(n)) inter++;
+    const base=Math.min(pf.size,followers.size);
+    if(base>=10&&inter/base<0.5){
+      const pct=Math.round(inter/base*100);
+      if(confirm(`這份檔案和上次分析的紀錄只有 ${pct}% 的追蹤者相同，看起來可能是不同的帳號。\n\n按「確定」：清除舊紀錄與忽略名單，當成新帳號重新開始。\n按「取消」：保留舊紀錄，照常比對。`)){
+        wipeStored(); prev=null;
+      }
+    }
+  }
   if(save){ // 匯出檔裡原本就有的顯示名稱
     let auto=0;
     for(const list of Object.values(found)) for(const o of list) for(const [n,,dn] of entries(o))
@@ -374,16 +403,15 @@ function analyze(found,save=true){
     mutual:pick(followers,n=>following.has(n)),
     unfollowed:[...unf],
     pending:[...pend],
-    lost:[],added:[],prevDate:null
+    lost:[],added:[],prevDate:null,persisted:true
   };
-  const prev=save?store.get(KEY):null;
-  if(prev&&Array.isArray(prev.followers)){
+  if(prev){
     const pf=new Set(prev.followers);
     d.lost=prev.followers.filter(n=>!followers.has(n)).map(n=>[n,now]);
     d.added=[...followers.keys()].filter(n=>!pf.has(n)).map(n=>[n,now]);
     d.prevDate=prev.date;
   }
-  if(save)store.set(KEY,{date:ymd(),followers:[...followers.keys()]});
+  if(save)d.persisted=store.set(KEY,{date:ymd(),followers:[...followers.keys()]});
   return d;
 }
 
@@ -474,9 +502,10 @@ function render(){
   $("result").classList.remove("hidden");
   $("hist").hidden=demoMode;
   renderSummary(); renderTabs(); renderList();
+  const warn=data.persisted===false?"<br>⚠️ 這個瀏覽器無法儲存歷史紀錄（可能是無痕模式），下次就無法比對退追。請先按上方的「下載歷史紀錄」備份。":"";
   $("note").innerHTML=data.prevDate
-    ? `退追比對基準：上次分析日期 <b>${data.prevDate}</b>（存在你的瀏覽器中）。`
-    : "這是第一次分析，已把快照存在你的瀏覽器。之後匯出新檔案再上傳，就能看到<b>退追者與新追蹤者</b>。想換裝置使用，請先按上方的「下載歷史紀錄」。";
+    ? `退追比對基準：上次分析日期 <b>${data.prevDate}</b>（存在你的瀏覽器中）。`+warn
+    : "這是第一次分析，已把快照存在你的瀏覽器。之後匯出新檔案再上傳，就能看到<b>退追者與新追蹤者</b>。想換裝置使用，請先按上方的「下載歷史紀錄」。"+warn;
   $("result").scrollIntoView({behavior:"smooth",block:"start"});
 }
 
@@ -537,6 +566,16 @@ async function importHistory(file){
   }catch(e){setMsg("這不是有效的歷史紀錄檔。")}
 }
 
+/* ---------- 清除已儲存的資料 ---------- */
+function clearAll(){
+  if(!confirm("要清除這個瀏覽器中儲存的所有資料嗎？\n\n包含：上次分析的追蹤者紀錄、忽略名單、已存的顯示名稱。\n清除後，下一次分析會當成第一次。\n（想保留的話，請先按「下載歷史紀錄」備份）\n\n此動作無法復原。")) return;
+  wipeStored();
+  data={}; demoMode=false;
+  $("result").classList.add("hidden");
+  setMsg("已清除這個瀏覽器中儲存的所有資料。現在可以上傳另一個帳號的匯出檔了。",true);
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
 /* ---------- 上傳 ---------- */
 async function handle(files){
   files=[...files];
@@ -586,6 +625,8 @@ $("sort").onchange=e=>{sortBy=e.target.value;if(data.followers)renderList()};
 $("copy").onclick=copyList;
 $("csv").onclick=downloadCsv;
 $("hdl").onclick=downloadHistory;
+$("clr").onclick=clearAll;
+$("clr2").onclick=clearAll;
 
 // 訪客數（GoatCounter 公開計數；未啟用或失敗時不顯示）
 (function(){
