@@ -189,7 +189,7 @@ footer .fine a{color:inherit;text-decoration:underline;display:inline-block;padd
   <input id="dfile" type="file" webkitdirectory multiple hidden>
 </div>
 <div class="opts" role="group" aria-label="其他選項">
-  <button class="opt" id="dirbtn" type="button" title="Safari 已自動解壓縮成資料夾時使用（僅電腦版）">📁 選擇資料夾</button>
+  <button class="opt" id="dirbtn" type="button" title="已解壓縮成資料夾時使用（僅電腦版）。也可以直接把資料夾拖進上傳框">📁 選擇資料夾</button>
   <button class="opt" id="jsonbtn" type="button" hidden title="已解壓縮時，直接選取裡面的 JSON 檔">📄 選擇 JSON 檔</button>
   <button class="opt" id="himp" type="button" title="匯入先前下載的歷史紀錄檔，用來比對誰退追">💾 匯入歷史紀錄</button>
   <button class="opt" id="clr" type="button" title="換分析另一個帳號前，清除已儲存的紀錄">🗑 清除資料</button>
@@ -258,7 +258,7 @@ footer .fine a{color:inherit;text-decoration:underline;display:inline-block;padd
       <li>把下載的 <b>.zip 直接拖進頁面最上方的上傳框</b>，或點一下選擇檔案。<b>不用解壓縮</b>。</li>
       <li>幾秒內就會顯示結果。匯出檔只在你的瀏覽器中處理，<b>不會上傳</b>。</li>
     </ul>
-    <div class="tip"><b>Mac 的 Safari 會自動解壓縮？</b>Safari 預設會把下載的 zip 自動解壓縮並刪掉 zip。這時可以把<b>解壓縮後的資料夾直接拖進上傳框</b>，或按上傳框下方的「<b>📁 選擇資料夾</b>」（電腦版），選那個資料夾即可。</div>
+    <div class="tip"><b>Mac 的 Safari 會自動解壓縮？</b>Safari 預設會把下載的 zip 自動解壓縮並刪掉 zip。最簡單的做法是把<b>解壓縮後的資料夾直接拖進上傳框</b>（不用點進去選檔案）。也可以按上傳框下方的「<b>📁 選擇資料夾</b>」（電腦版）；在 Chrome、Edge 會出現「選取資料夾」視窗，直接選那個資料夾再按「選取」即可。</div>
     <div class="tip"><b>iPhone / Android 使用者注意：</b>下載後請<b>不要點開 zip</b>，否則會被自動解壓縮成資料夾。手機的選檔視窗<b>沒辦法選資料夾</b>，所以如果已經解壓縮了，請按上傳框下方的「<b>📄 選擇 JSON 檔</b>」，進入 <b>connections → followers_and_following</b>，<b>同時選取 followers_1.json 和 following.json</b> 兩個檔案（可複選）即可。想看「已取消追蹤」和「待處理請求」，可以再一併選取 recently_unfollowed_profiles.json、pending_follow_requests.json。</div>
 
     <h2><i>4</i>怎麼看結果</h2>
@@ -686,10 +686,30 @@ drop.ondrop=e=>{e.preventDefault();drop.classList.remove("over");filesFromDrop(e
 drop.onkeydown=e=>{if(e.target===drop&&(e.key==="Enter"||e.key===" ")){e.preventDefault();$("file").click()}};
 const isTouchDevice=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
 if(isTouchDevice){$("dirbtn").hidden=true;$("jsonbtn").hidden=false} // 手機的選檔視窗不支援選資料夾
-$("dirbtn").onclick=()=>{
-  setMsg("請在跳出的視窗中，選取「解壓縮後的資料夾」本身（不要點進去選檔案），再按「上傳」或「選擇」。",true);
+// 資料夾選擇：Chrome / Edge 電腦版用「選取資料夾」視窗；其他瀏覽器退回 <input webkitdirectory>
+async function pickDirectory(){
+  if(window.showDirectoryPicker){
+    try{
+      const root=await window.showDirectoryPicker({id:"ig-export",mode:"read"});
+      const files=[];
+      const walk=async(h,path)=>{
+        for await(const [name,e] of h.entries()){
+          if(e.kind==="directory") await walk(e,path+name+"/");
+          else if(wanted({name})){const f=await e.getFile();Object.defineProperty(f,"_path",{value:path+name});files.push(f)}
+        }
+      };
+      await walk(root,root.name+"/");
+      if(!files.length){setMsg("這個資料夾裡找不到 JSON 檔。請選擇解壓縮後的資料夾（裡面有 followers_and_following）。");return}
+      handle(files); return;
+    }catch(e){
+      if(e&&e.name==="AbortError") return;   // 使用者取消
+      /* 其他錯誤（權限被拒等）→ 退回舊做法 */
+    }
+  }
+  setMsg("請在跳出的視窗中，選取「解壓縮後的資料夾」本身，再按「上傳」或「選擇」。也可以直接把資料夾拖進上方的上傳框。",true);
   $("dfile").click();
-};
+}
+$("dirbtn").onclick=pickDirectory;
 $("jsonbtn").onclick=()=>{
   setMsg("請進入 connections → followers_and_following，同時選取 followers_1.json 和 following.json（可複選）。",true);
   $("file").click();
