@@ -439,7 +439,7 @@ function countUp(el,to){
 
 let firstRender=true;
 function renderSummary(){
-  const items=[["追蹤者",data.followers.size],["追蹤中",data.following.size],["互相追蹤",data.mutual.length],["對方未回追",data.notBack.length]];
+  const items=[["粉絲人數",data.followers.size],["追蹤人數",data.following.size],["互相追蹤",data.mutual.length],["對方未回追",data.notBack.length]];
   $("sum").innerHTML=items.map(([l,v])=>`<div class="stat"><b data-v="${v}">0</b><span>${l}</span></div>`).join("");
   $("sum").querySelectorAll("b").forEach(b=>countUp(b,+b.dataset.v));
 }
