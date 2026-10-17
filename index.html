@@ -24,7 +24,7 @@
 <meta name="twitter:image" content="https://ig-follow-checker-five.vercel.app/og-image.png">
 <style>
 :root{
-  --bg:#fafafa;--fg:#262626;--mut:#8e8e8e;--card:#fff;--line:#dbdbdb;--soft:#f2f2f2;
+  --bg:#fafafa;--fg:#262626;--mut:#6b6b6b;--card:#fff;--line:#dbdbdb;--soft:#f2f2f2;
   --grad:linear-gradient(45deg,#feda75,#fa7e1e 25%,#d62976 50%,#962fbf 75%,#4f5bd5);
   --acc:#d62976;--blue:#0095f6;--ok:#1a8f4a;--err:#ed4956;
 }
@@ -55,6 +55,7 @@ h1 span{background:var(--grad);-webkit-background-clip:text;background-clip:text
 /* 上傳區 */
 #drop{position:relative;border-radius:22px;padding:2px;background:var(--grad);background-size:300% 300%;animation:shift 8s linear infinite,rise .7s .1s both;cursor:pointer;transition:transform .25s}
 #drop:hover{transform:translateY(-3px)}
+#drop:focus-visible{outline:3px solid var(--blue);outline-offset:4px}
 #drop .in{background:var(--card);border-radius:20px;padding:40px 20px;text-align:center}
 #drop.over{transform:scale(1.02)}
 #drop.over .in{background:var(--soft)}
@@ -63,9 +64,9 @@ h1 span{background:var(--grad);-webkit-background-clip:text;background-clip:text
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(214,41,118,.35)}100%{box-shadow:0 0 0 22px rgba(214,41,118,0)}}
 .in b{font-weight:700}
 .privacy{font-size:.85rem;color:var(--mut);margin-top:8px}
-.demo{display:inline-block;margin-top:14px;border:0;background:var(--blue);color:#fff;border-radius:10px;padding:8px 16px;font:inherit;font-size:.9rem;font-weight:600;cursor:pointer;transition:transform .15s,opacity .15s}
+.demo{display:inline-block;margin:14px 0 8px;min-height:40px;border:0;background:var(--blue);color:#fff;border-radius:10px;padding:8px 16px;font:inherit;font-size:.9rem;font-weight:600;cursor:pointer;transition:transform .15s,opacity .15s}
 .demo:hover{opacity:.9}.demo:active{transform:scale(.95)}
-.linkbtn{display:block;margin:12px auto 0;border:0;background:none;color:var(--mut);font:inherit;font-size:.8rem;text-decoration:underline;cursor:pointer}
+.linkbtn{display:block;margin:4px auto 0;padding:10px 14px;min-height:40px;border:0;background:none;color:var(--mut);font:inherit;font-size:.82rem;text-decoration:underline;cursor:pointer}
 .linkbtn:hover{color:var(--acc)}
 #msg{margin-top:12px;text-align:center;font-size:.9rem;color:var(--err)}
 #msg.ok{color:var(--ok)}
@@ -86,7 +87,7 @@ h1 span{background:var(--grad);-webkit-background-clip:text;background-clip:text
 /* 分頁 */
 .tabs{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 10px;scrollbar-width:none;-webkit-mask:linear-gradient(90deg,#000 92%,transparent)}
 .tabs::-webkit-scrollbar{display:none}
-.tabs button{flex:none;border:0;background:var(--soft);color:var(--fg);border-radius:999px;padding:8px 14px;font:inherit;font-size:.88rem;font-weight:600;cursor:pointer;transition:all .25s;white-space:nowrap}
+.tabs button{flex:none;min-height:40px;border:0;background:var(--soft);color:var(--fg);border-radius:999px;padding:8px 14px;font:inherit;font-size:.88rem;font-weight:600;cursor:pointer;transition:all .25s;white-space:nowrap}
 .tabs button:hover{transform:translateY(-2px)}
 .tabs button.on{background:var(--grad);color:#fff;box-shadow:0 6px 16px rgba(214,41,118,.3)}
 .tabs button i{font-style:normal;opacity:.75;margin-left:4px;font-weight:500}
@@ -98,7 +99,7 @@ h1 span{background:var(--grad);-webkit-background-clip:text;background-clip:text
 .search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:18px;height:18px;stroke:var(--mut);fill:none;stroke-width:2}
 .tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 6px}
 .tools .sp{flex:1}
-.tools select,.sbtn{border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:999px;padding:6px 12px;font:inherit;font-size:.8rem;cursor:pointer;transition:border-color .2s,color .2s}
+.tools select,.sbtn{min-height:40px;border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:999px;padding:6px 12px;font:inherit;font-size:.8rem;cursor:pointer;transition:border-color .2s,color .2s}
 .tools select:hover,.sbtn:hover{border-color:var(--acc);color:var(--acc)}
 .desc{color:var(--mut);font-size:.88rem;margin:6px 4px 10px;min-height:1.3em}
 
@@ -116,7 +117,7 @@ li{animation:slide .45s both;margin-bottom:8px}
 .go{flex:none;color:var(--blue);font-weight:600;font-size:.82rem;opacity:0;transition:opacity .2s}
 .rowc a:hover .go{opacity:1}
 @media(max-width:520px){.go{display:none}}
-.act{flex:none;border:1px solid var(--line);background:var(--card);color:var(--mut);border-radius:999px;padding:7px 12px;font:inherit;font-size:.78rem;cursor:pointer;transition:all .2s}
+.act{flex:none;min-height:40px;border:1px solid var(--line);background:var(--card);color:var(--mut);border-radius:999px;padding:8px 14px;font:inherit;font-size:.78rem;cursor:pointer;transition:all .2s}
 .act:hover{border-color:var(--acc);color:var(--acc)}
 .empty{text-align:center;color:var(--mut);padding:36px 0;animation:rise .5s both}
 .empty big{display:block;font-size:2.2rem}
@@ -132,8 +133,8 @@ li{animation:slide .45s both;margin-bottom:8px}
 .guide summary::after{content:"+";font-size:1.4rem;line-height:1;color:var(--acc);transition:transform .3s}
 .guide[open] summary::after{transform:rotate(45deg)}
 .gbody{padding:4px 18px 18px;font-size:.92rem;line-height:1.7;animation:rise .4s both}
-.gbody h3{margin:20px 0 6px;font-size:1rem;display:flex;align-items:center;gap:8px}
-.gbody h3 i{font-style:normal;width:24px;height:24px;border-radius:50%;background:var(--grad);color:#fff;display:inline-grid;place-items:center;font-size:.8rem;font-weight:700;flex:none}
+.gbody h2{margin:20px 0 6px;font-size:1rem;display:flex;align-items:center;gap:8px}
+.gbody h2 i{font-style:normal;width:24px;height:24px;border-radius:50%;background:var(--grad);color:#fff;display:inline-grid;place-items:center;font-size:.8rem;font-weight:700;flex:none}
 .gbody ol,.gbody ul{margin:6px 0;padding-left:1.4em}
 .gbody ul{list-style:disc}
 .gbody li{display:list-item;animation:none;margin:3px 0}
@@ -146,17 +147,19 @@ li{animation:slide .45s both;margin-bottom:8px}
 .how li{display:list-item;animation:none;margin:0 0 6px;color:var(--fg)}
 footer{text-align:center;color:var(--mut);font-size:.78rem;margin-top:28px}
 footer .credit{font-size:.92rem;letter-spacing:.06em;color:var(--fg);opacity:.85}
-footer .ig{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:7px 16px;border-radius:999px;background:var(--grad);background-size:200% 200%;color:#fff;font-weight:600;font-size:.85rem;text-decoration:none;box-shadow:0 6px 16px rgba(214,41,118,.3);transition:transform .2s,box-shadow .2s}
+footer .ig{display:inline-flex;align-items:center;gap:6px;margin-top:10px;min-height:40px;padding:7px 16px;border-radius:999px;background:var(--grad);background-size:200% 200%;color:#fff;font-weight:600;font-size:.85rem;text-decoration:none;box-shadow:0 6px 16px rgba(214,41,118,.3);transition:transform .2s,box-shadow .2s}
 footer .ig:hover{transform:translateY(-3px);box-shadow:0 10px 22px rgba(214,41,118,.4);animation:shift 3s ease infinite}
 footer .ig svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2}
-footer .star{display:inline-flex;align-items:center;gap:6px;margin:10px 0 0 8px;padding:7px 16px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--fg);font-weight:600;font-size:.85rem;text-decoration:none;transition:transform .2s,box-shadow .2s,border-color .2s}
+footer .star{display:inline-flex;align-items:center;gap:6px;margin:10px 0 0 8px;min-height:40px;padding:7px 16px;font-family:inherit;cursor:pointer;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--fg);font-weight:600;font-size:.85rem;text-decoration:none;transition:transform .2s,box-shadow .2s,border-color .2s}
 footer .star:hover{transform:translateY(-3px);border-color:#f5b301;box-shadow:0 8px 20px rgba(245,179,1,.28)}
 footer .star span{display:inline-block;transition:transform .4s}
 footer .star:hover span{transform:rotate(72deg) scale(1.25)}
 @media(max-width:520px){footer .star{margin:10px 0 0}}
 footer .visits{margin-top:14px;font-size:.82rem;color:var(--mut);animation:rise .6s both}
 footer .visits b{color:var(--fg);font-weight:800;font-variant-numeric:tabular-nums}
-footer .fine{margin-top:4px;font-size:.72rem}
+footer .fine{margin-top:10px;font-size:.75rem}
+footer .fine a{color:inherit;text-decoration:underline;display:inline-block;padding:13px 8px;margin:-13px -8px}
+.asof{font-size:.8rem;color:var(--mut);margin:-6px 4px 14px;text-align:center}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -169,24 +172,27 @@ footer .fine{margin-top:4px;font-size:.72rem}
   <p class="sub">誰沒回追你、你沒回追誰、誰默默退追，一次看清楚</p>
 </header>
 
-<div id="drop">
+<div id="drop" role="button" tabindex="0" aria-label="選擇或拖曳 Instagram 匯出檔以上傳">
   <div class="in">
     <div class="up"><svg viewBox="0 0 24 24"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"/></svg></div>
     <div><b>點擊選擇</b>或拖曳 Instagram 匯出的 <b>.zip</b>（JSON 格式）</div>
     <div class="privacy">🔒 匯出檔只在你的瀏覽器中處理，不會上傳</div>
     <button class="demo" id="demo" type="button" data-nopick>先用範例資料試玩</button>
+    <button class="linkbtn" id="dirbtn" type="button" data-nopick>已解壓縮成資料夾？選擇資料夾</button>
     <button class="linkbtn" id="himp" type="button" data-nopick>已有歷史紀錄檔？匯入</button>
     <button class="linkbtn" id="clr" type="button" data-nopick>要換分析另一個帳號？清除已儲存的資料</button>
     <div class="loader"></div>
   </div>
   <input id="file" type="file" accept=".zip,.json" multiple hidden>
   <input id="hfile" type="file" accept=".json" hidden>
+  <input id="dfile" type="file" webkitdirectory multiple hidden>
 </div>
 <div id="msg" role="status" aria-live="polite"></div>
 
 <div id="result" class="hidden">
   <div class="sum" id="sum"></div>
-  <div class="tabs" id="tabs"></div>
+  <div class="asof" id="asof"></div>
+  <div class="tabs" id="tabs" role="tablist" aria-label="清單分類"></div>
   <div class="search"><svg viewBox="0 0 24 24" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" placeholder="搜尋帳號…"></div>
   <div class="tools">
     <select id="sort" aria-label="排序">
@@ -219,7 +225,7 @@ footer .fine{margin-top:4px;font-size:.72rem}
 <details class="guide">
   <summary>📖 詳細的使用說明（點開看完整步驟）</summary>
   <div class="gbody">
-    <h3><i>1</i>申請匯出（手機 Instagram App）</h3>
+    <h2><i>1</i>申請匯出（手機 Instagram App）</h2>
     <ol>
       <li>打開 Instagram，點右下角<b>個人檔案</b>，再點右上角<b>選單（☰）</b>。</li>
       <li>點<b>設定與活動</b>，找到並進入<b>帳號中心</b>。</li>
@@ -233,21 +239,22 @@ footer .fine{margin-top:4px;font-size:.72rem}
     <div class="tip"><b>為什麼只勾追蹤者與追蹤中？</b>檔案最小、處理最快，也不會匯出你的訊息、照片等私人資料。</div>
     <div class="tip">選項名稱可能因 App 版本略有不同。用電腦的話，也可以到 instagram.com → 更多 → 設定 → 帳號中心，步驟相同。</div>
 
-    <h3><i>2</i>等待並下載</h3>
+    <h2><i>2</i>等待並下載</h2>
     <ul>
       <li>通常<b>數分鐘至數小時</b>，最久約 1–2 天。完成後 Instagram 會發通知，並寄信到你填的信箱。</li>
       <li>等待期間可以關閉 App，不用一直開著。</li>
       <li>下載連結只有 <b>4 天</b>有效，收到通知後請盡快下載 .zip 檔。</li>
     </ul>
 
-    <h3><i>3</i>上傳分析</h3>
+    <h2><i>3</i>上傳分析</h2>
     <ul>
       <li>把下載的 <b>.zip 直接拖進頁面最上方的上傳框</b>，或點一下選擇檔案。<b>不用解壓縮</b>。</li>
       <li>幾秒內就會顯示結果。匯出檔只在你的瀏覽器中處理，<b>不會上傳</b>。</li>
     </ul>
+    <div class="tip"><b>Mac 的 Safari 會自動解壓縮？</b>Safari 預設會把下載的 zip 自動解壓縮並刪掉 zip。這時可以把<b>解壓縮後的資料夾直接拖進上傳框</b>，或按上傳框下方的「<b>已解壓縮成資料夾？選擇資料夾</b>」，選那個資料夾即可。</div>
     <div class="tip"><b>iPhone 使用者注意：</b>下載後請<b>不要點開 zip</b>，否則會被自動解壓縮成資料夾。如果已經解壓縮了，上傳時進入 <b>connections → followers_and_following</b> 資料夾，<b>同時選取 followers_1.json 和 following.json</b> 兩個檔案（可複選）即可。想看「已取消追蹤」和「待處理請求」，可以再一併選取 recently_unfollowed_profiles.json、pending_follow_requests.json。</div>
 
-    <h3><i>4</i>怎麼看結果</h3>
+    <h2><i>4</i>怎麼看結果</h2>
     <dl>
       <dt>對方未回追</dt><dd>你追蹤了他，但他沒有追蹤你。日期是你追蹤他的時間。</dd>
       <dt>我未回追</dt><dd>他追蹤了你，但你沒有追蹤他。</dd>
@@ -261,7 +268,7 @@ footer .fine{margin-top:4px;font-size:.72rem}
     <div class="tip"><b>常追蹤名人或品牌？</b>他們一定不會回追。在「對方未回追」或「我未回追」按帳號右邊的<b>忽略</b>，就會從清單和統計中隱藏。</div>
     <div class="tip">點任一帳號會開啟對方的 Instagram 主頁。可用搜尋框找帳號、用下拉選單排序，也能<b>複製清單</b>或<b>下載 CSV</b>（用 Excel 或 Google 試算表開啟）。</div>
 
-    <h3><i>5</i>怎麼看「誰退追我」與換裝置</h3>
+    <h2><i>5</i>怎麼看「誰退追我」與換裝置</h2>
     <ol>
       <li>第一次上傳時，工具會把你當下的追蹤者名單<b>存在這個瀏覽器</b>。</li>
       <li>過一段時間（建議每週或每月）重新匯出，再上傳一次。</li>
@@ -271,7 +278,7 @@ footer .fine{margin-top:4px;font-size:.72rem}
     <div class="tip">歷史紀錄存在瀏覽器裡，清除網站資料或長時間不使用（部分瀏覽器會自動清理）可能會消失，建議定期下載備份。</div>
     <div class="tip"><b>要換分析另一個帳號？</b>先按上傳框下方的「<b>要換分析另一個帳號？清除已儲存的資料</b>」（結果頁下方也有「🗑 清除所有資料」），會一併清掉歷史紀錄、忽略名單與已存的名稱。清除前想保留的話，記得先「下載歷史紀錄」。</div>
 
-    <h3><i>6</i>常見問題</h3>
+    <h2><i>6</i>常見問題</h2>
     <dl>
       <dt>會不會需要我的 Instagram 密碼？</dt><dd>不會。本工具完全不需要登入你的帳號。</dd>
       <dt>我的資料安全嗎？</dt><dd>匯出檔只在你自己的瀏覽器中處理，不會上傳到任何伺服器。網站只會用不含 cookie 的方式匿名統計造訪人次，不會讀取你的檔案內容。</dd>
@@ -281,7 +288,7 @@ footer .fine{margin-top:4px;font-size:.72rem}
       <dt>帳號名稱顯示的是 ID，不是暱稱？</dt><dd>Instagram 匯出的追蹤名單只有帳號 ID，沒有暱稱與頭貼。部分帳號（例如密友、追蹤請求）的檔案裡有名稱，會自動顯示。</dd>
     </dl>
 
-    <h3><i>7</i>歡迎在 GitHub 按個星星 ⭐</h3>
+    <h2><i>7</i>歡迎在 GitHub 按個星星 ⭐</h2>
     <ol>
       <li>點頁面最下方的「<b>⭐ 幫我按個星星</b>」，開啟專案頁面。</li>
       <li>登入 GitHub 後（右上角 <b>Sign in</b>），點右上角的 <b>⭐ Starred</b> 即可。</li>
@@ -291,8 +298,8 @@ footer .fine{margin-top:4px;font-size:.72rem}
 
 <footer><div class="credit">Designed &amp; Developed by</div>
 <a class="ig" href="https://www.instagram.com/mu_3.27" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5.5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r=".6" fill="currentColor"/></svg>@mu_3.27</a>
-<a class="star" href="https://github.com/chou100327-source/ig-follow-checker" target="_blank" rel="noopener"><span>⭐</span>幫我按個星星</a><div class="visits" id="visits" hidden></div>
-<div class="fine">獨立開發之工具，與 Instagram 及 Meta 無關 · 資料僅於本機瀏覽器處理</div></footer>
+<a class="star" href="https://github.com/chou100327-source/ig-follow-checker" target="_blank" rel="noopener"><span>⭐</span>幫我按個星星</a><button class="star" id="share" type="button"><span>🔗</span>分享給朋友</button><div class="visits" id="visits" hidden></div>
+<div class="fine">獨立開發之工具，與 Instagram 及 Meta 無關 · 資料僅於本機瀏覽器處理 · <a href="privacy.html">隱私權說明</a></div></footer>
 </main>
 
 <script data-goatcounter="https://igtracker.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
@@ -310,6 +317,7 @@ let data={}, tab="notBack", sortBy="new", demoMode=false;
 let ignored=new Set(store.get(IKEY)||[]);
 let names=store.get(NKEY)||{};
 const saveIgnored=()=>{if(!demoMode)store.set(IKEY,[...ignored])};
+const esc=t=>String(t).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const setMsg=(t,ok=false)=>{const m=$("msg");m.textContent=t;m.className=ok?"ok":""};
 
 /* ---------- 解析 ---------- */
@@ -317,8 +325,10 @@ const USER_LABELS=["用戶名稱","用户名","用户名称","Username","usernam
 function entries(obj){
   let items=obj;
   if(obj&&!Array.isArray(obj)) items=Object.values(obj).find(Array.isArray)||[];
+  if(!Array.isArray(items)) items=[];
   const out=[];
   for(const it of items){
+    if(!it||typeof it!=="object") continue;
     if(it.label_values){
       let user="",dn="";
       const lv=it.label_values;
@@ -341,28 +351,39 @@ function entries(obj){
   return out;
 }
 
+let sawHtml=false;
 async function readFiles(files){
-  const found={};
-  const add=(name,text)=>{
-    const base=name.split("/").pop();
-    if(!base.endsWith(".json")||!/follow/i.test(name)) return;
+  const found={}; sawHtml=false;
+  const add=(path,text)=>{
+    const base=path.split("/").pop();
+    if(/\.html?$/i.test(base)&&/follow/i.test(path)){sawHtml=true;return}
+    if(!base.endsWith(".json")||!/follow/i.test(path)) return;
     try{(found[base]=found[base]||[]).push(JSON.parse(text))}catch(e){}
   };
   for(const f of files){
-    if(f.name.endsWith(".zip")){
+    const path=f._path||f.webkitRelativePath||f.name;
+    if(f.name.toLowerCase().endsWith(".zip")){
       if(f.size>400*1024*1024) throw new Error(`這個檔案很大（約 ${Math.round(f.size/1048576)} MB），可能連照片或訊息一起匯出了，瀏覽器可能會當機。請重新匯出，只勾選「追蹤者與追蹤中」。`);
-      const z=await JSZip.loadAsync(f);
+      let z;
+      try{z=await JSZip.loadAsync(f)}catch(e){throw new Error("無法讀取這個 zip，檔案可能損毀，或不是 Instagram 的匯出檔。")}
       for(const n of Object.keys(z.files)){
-        if(!z.files[n].dir&&/follow/i.test(n)&&n.endsWith(".json")) add(n,await z.files[n].async("string"));
+        if(z.files[n].dir||!/follow/i.test(n)) continue;
+        if(/\.html?$/i.test(n)){sawHtml=true;continue}
+        if(n.endsWith(".json")) add(n,await z.files[n].async("string"));
       }
-    } else add(f.name,await f.text());
+    } else {
+      let text;
+      try{text=await f.text()}catch(e){throw new Error(`無法讀取「${f.name}」。如果這是資料夾，請按上傳框下方的「選擇資料夾」，或把資料夾拖進來。`)}
+      add(path,text);
+    }
   }
   return found;
 }
 
+const FILE_RE={followers:/^followers(_\d+)?\.json$/i,following:/^following(_\d+)?\.json$/i};
 const collect=(found,prefix)=>{
   const m=new Map();
-  for(const [f,list] of Object.entries(found)) if(f.startsWith(prefix))
+  for(const [f,list] of Object.entries(found)) if(FILE_RE[prefix]?FILE_RE[prefix].test(f):f.startsWith(prefix))
     for(const o of list) for(const [n,t] of entries(o)) m.set(n,t);
   return m;
 };
@@ -404,7 +425,8 @@ function analyze(found,save=true){
     mutual:pick(followers,n=>following.has(n)),
     unfollowed:[...unf],
     pending:[...pend],
-    lost:[],added:[],prevDate:null,persisted:true
+    lost:[],added:[],prevDate:null,persisted:true,
+    latest:Math.max(0,...[followers,following,unf,pend].flatMap(m=>[...m.values()]))
   };
   if(prev){
     const pf=new Set(prev.followers);
@@ -452,6 +474,7 @@ function countUp(el,to){
   const t0=performance.now(),dur=900;
   const step=t=>{const p=Math.min((t-t0)/dur,1);el.textContent=Math.round(to*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(step)};
   requestAnimationFrame(step);
+  setTimeout(()=>{el.textContent=to},dur+150); // 分頁在背景時動畫會暫停，確保最終數字一定正確
 }
 function renderSummary(anim=true){
   const items=[["粉絲人數",data.followers.size],["追蹤人數",data.following.size],["互相追蹤",data.mutual.length],["對方未回追",listFor("notBack").length]];
@@ -459,7 +482,7 @@ function renderSummary(anim=true){
   if(anim)$("sum").querySelectorAll("b").forEach(b=>countUp(b,+b.dataset.v));
 }
 function renderTabs(){
-  $("tabs").innerHTML=TABS.map(([k,l])=>`<button data-k="${k}" class="${k===tab?"on":""}">${l}<i>${listFor(k).length}</i></button>`).join("");
+  $("tabs").innerHTML=TABS.map(([k,l])=>`<button role="tab" aria-selected="${k===tab}" data-k="${k}" class="${k===tab?"on":""}">${l}<i>${listFor(k).length}</i></button>`).join("");
   $("tabs").querySelectorAll("button").forEach(b=>b.onclick=()=>{tab=b.dataset.k;renderTabs();renderList()});
 }
 function refreshCounts(){renderSummary(false);renderTabs();renderList()}
@@ -503,9 +526,10 @@ function render(){
   $("result").classList.remove("hidden");
   $("hist").hidden=demoMode;
   renderSummary(); renderTabs(); renderList();
+  $("asof").textContent=data.latest?`📅 以上是匯出檔當時的資料（檔案中最新一筆紀錄：${(()=>{const d=new Date(data.latest*1000),p=n=>String(n).padStart(2,"0");return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`})()}），可能與 Instagram 目前的數字略有不同。`:"";
   const warn=data.persisted===false?"<br>⚠️ 這個瀏覽器無法儲存歷史紀錄（可能是無痕模式），下次就無法比對退追。請先按上方的「下載歷史紀錄」備份。":"";
   $("note").innerHTML=data.prevDate
-    ? `退追比對基準：上次分析日期 <b>${data.prevDate}</b>（存在你的瀏覽器中）。`+warn
+    ? `退追比對基準：上次分析日期 <b>${esc(data.prevDate)}</b>（存在你的瀏覽器中）。`+warn
     : "這是第一次分析，已把快照存在你的瀏覽器。之後匯出新檔案再上傳，就能看到<b>退追者與新追蹤者</b>。想換裝置使用，請先按上方的「下載歷史紀錄」。"+warn;
   $("result").scrollIntoView({behavior:"smooth",block:"start"});
 }
@@ -572,7 +596,7 @@ function clearAll(){
   if(!confirm("要清除這個瀏覽器中儲存的所有資料嗎？\n\n包含：上次分析的追蹤者紀錄、忽略名單、已存的顯示名稱。\n清除後，下一次分析會當成第一次。\n（想保留的話，請先按「下載歷史紀錄」備份）\n\n此動作無法復原。")) return;
   wipeStored();
   data={}; demoMode=false;
-  $("result").classList.add("hidden");
+  $("result").classList.add("hidden"); $("asof").textContent="";
   setMsg("已清除這個瀏覽器中儲存的所有資料。現在可以上傳另一個帳號的匯出檔了。",true);
   window.scrollTo({top:0,behavior:"smooth"});
 }
@@ -585,8 +609,12 @@ async function handle(files){
   $("drop").classList.add("loading");
   try{
     const found=await readFiles(files);
-    if(demoMode){ignored=new Set(store.get(IKEY)||[]);demoMode=false}
-    data=analyze(found);tab="notBack";render();
+    if(sawHtml&&!Object.keys(found).some(k=>FILE_RE.followers.test(k)||FILE_RE.following.test(k)))
+      throw new Error("看起來你匯出的是 HTML 格式，本工具只能讀 JSON。請重新匯出，格式選「JSON」。");
+    const wasDemo=demoMode;
+    const d=analyze(found);
+    if(wasDemo){ignored=new Set(store.get(IKEY)||[]);demoMode=false} // 成功分析後才離開範例模式
+    data=d;tab="notBack";render();
   }catch(e){setMsg(e.message)}
   $("drop").classList.remove("loading");
 }
@@ -612,6 +640,33 @@ function demo(){
   $("note").innerHTML="這是<b>範例資料</b>（全為虛構帳號），用來展示各分頁功能。「流失追蹤者」與「新增追蹤者」需要你上傳過兩次匯出檔才會有真實資料。";
 }
 
+/* ---------- 資料夾上傳（Safari 會自動解壓縮 zip）---------- */
+function readEntry(entry,path=""){
+  return new Promise(res=>{
+    if(entry.isFile){
+      entry.file(f=>{Object.defineProperty(f,"_path",{value:path+f.name});res([f])},()=>res([]));
+    } else if(entry.isDirectory){
+      const reader=entry.createReader(), all=[];
+      const next=()=>reader.readEntries(async es=>{
+        if(!es.length){const parts=await Promise.all(all.map(e=>readEntry(e,path+entry.name+"/")));res(parts.flat());return}
+        all.push(...es); next();
+      },()=>res([]));
+      next();
+    } else res([]);
+  });
+}
+const wanted=f=>/\.(json|zip)$/i.test(f.name);
+async function filesFromDrop(dt){
+  // 注意：dt.items 必須在 await 之前同步讀取
+  const entries=[...(dt.items||[])].map(i=>i.webkitGetAsEntry&&i.webkitGetAsEntry()).filter(Boolean);
+  const plain=[...(dt.files||[])];
+  if(entries.some(e=>e.isDirectory)){
+    const parts=await Promise.all(entries.map(e=>readEntry(e)));
+    return parts.flat().filter(wanted);
+  }
+  return plain;
+}
+
 const drop=$("drop");
 drop.onclick=e=>{if(!e.target.closest("[data-nopick]"))$("file").click()};
 $("demo").onclick=demo;
@@ -620,12 +675,29 @@ $("hfile").onchange=e=>{if(e.target.files[0])importHistory(e.target.files[0]);e.
 $("file").onchange=e=>{handle(e.target.files);e.target.value=""};
 drop.ondragover=e=>{e.preventDefault();drop.classList.add("over")};
 drop.ondragleave=()=>drop.classList.remove("over");
-drop.ondrop=e=>{e.preventDefault();drop.classList.remove("over");handle(e.dataTransfer.files)};
+drop.ondrop=e=>{e.preventDefault();drop.classList.remove("over");filesFromDrop(e.dataTransfer).then(handle)};
+drop.onkeydown=e=>{if(e.target===drop&&(e.key==="Enter"||e.key===" ")){e.preventDefault();$("file").click()}};
+$("dirbtn").onclick=()=>$("dfile").click();
+$("dfile").onchange=e=>{
+  const fs=[...e.target.files].filter(wanted);
+  fs.forEach(f=>Object.defineProperty(f,"_path",{value:f.webkitRelativePath||f.name}));
+  e.target.value="";
+  if(!fs.length){setMsg("這個資料夾裡找不到 JSON 檔。請確認選的是解壓縮後的資料夾（裡面有 followers_and_following）。");return}
+  handle(fs);
+};
 $("q").oninput=()=>{if(data.followers)renderList()};
 $("sort").onchange=e=>{sortBy=e.target.value;if(data.followers)renderList()};
 $("copy").onclick=copyList;
 $("csv").onclick=downloadCsv;
 $("hdl").onclick=downloadHistory;
+async function shareSite(){
+  const url="https://ig-follow-checker-five.vercel.app/", text="免登入的 IG 追蹤分析器：查誰沒回追、誰退追，檔案不上傳。";
+  if(navigator.share){try{await navigator.share({title:document.title,text,url});return}catch(e){if(e&&e.name==="AbortError")return}}
+  try{await navigator.clipboard.writeText(url)}
+  catch(e){const t=document.createElement("textarea");t.value=url;document.body.append(t);t.select();try{document.execCommand("copy")}catch(_){}t.remove()}
+  flash($("share"),"✓ 已複製連結");
+}
+$("share").onclick=shareSite;
 $("clr").onclick=clearAll;
 $("clr2").onclick=clearAll;
 

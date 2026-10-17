@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<title>隱私權說明｜IG 追蹤分析器</title>
+<meta name="description" content="IG 追蹤分析器如何處理你的資料：匯出檔只在瀏覽器處理、不上傳；說明儲存了什麼、使用了哪些第三方服務，以及如何清除。">
+<link rel="canonical" href="https://ig-follow-checker-five.vercel.app/privacy.html">
+<meta name="theme-color" content="#d62976">
+<style>
+:root{--bg:#fafafa;--fg:#262626;--mut:#6b6b6b;--card:#fff;--line:#dbdbdb;--soft:#f2f2f2;--acc:#d62976;--grad:linear-gradient(45deg,#feda75,#fa7e1e 25%,#d62976 50%,#962fbf 75%,#4f5bd5)}
+@media (prefers-color-scheme:dark){:root{--bg:#000;--fg:#f5f5f5;--mut:#a8a8a8;--card:#121212;--line:#262626;--soft:#1c1c1c;--acc:#ff4f9a}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.75 -apple-system,BlinkMacSystemFont,"PingFang TC","Helvetica Neue",sans-serif}
+main{max-width:720px;margin:0 auto;padding:32px 16px 72px}
+a{color:var(--acc)}
+.back{display:inline-block;margin-bottom:18px;font-size:.92rem;text-decoration:none;min-height:40px;line-height:40px}
+.back:hover{text-decoration:underline}
+h1{font-size:1.7rem;margin:0 0 6px;font-weight:800}
+h1 span{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--mut);margin:0 0 24px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:6px 20px 18px}
+h2{font-size:1.05rem;margin:22px 0 4px}
+p,ul{margin:6px 0}
+ul{padding-left:1.3em}
+.mut{color:var(--mut);font-size:.88rem}
+table{border-collapse:collapse;width:100%;font-size:.9rem;margin:8px 0}
+th,td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:left;vertical-align:top}
+th{color:var(--mut);font-weight:600}
+code{background:var(--soft);padding:1px 6px;border-radius:6px;font-size:.88em}
+</style>
+</head>
+<body>
+<main>
+<a class="back" href="./">← 回到 IG 追蹤分析器</a>
+<h1>隱私權<span>說明</span></h1>
+<p class="sub">最後更新：2026-10-17</p>
+
+<div class="card">
+  <h2>一句話總結</h2>
+  <p><b>你的 Instagram 匯出檔只在你自己的瀏覽器裡處理，不會上傳到任何伺服器。</b>本工具不需要你的 Instagram 帳號或密碼。</p>
+
+  <h2>我們處理哪些資料？</h2>
+  <ul>
+    <li><b>你上傳的匯出檔</b>：讀取後只在瀏覽器的記憶體中分析，關閉分頁就消失，不會傳送出去。</li>
+    <li><b>儲存在你瀏覽器裡的資料</b>（只存在你的裝置，我們讀不到）：</li>
+  </ul>
+  <table>
+    <tr><th>內容</th><th>用途</th></tr>
+    <tr><td>上次分析的「追蹤者帳號清單」與日期</td><td>下次上傳時比對誰退追、誰新追蹤你</td></tr>
+    <tr><td>你按過「忽略」的帳號</td><td>從清單隱藏你故意追蹤的帳號</td></tr>
+    <tr><td>匯出檔裡原本就有的顯示名稱</td><td>在清單中顯示名稱，方便辨認</td></tr>
+  </table>
+  <p class="mut">這些存放在瀏覽器的 <code>localStorage</code>，不會自動同步到任何地方。</p>
+
+  <h2>第三方服務</h2>
+  <ul>
+    <li><b>Vercel</b>：網站託管在 Vercel，其伺服器可能依其政策留下一般網站都有的連線記錄。</li>
+    <li><b>cdnjs（Cloudflare）</b>：載入解壓縮用的 JSZip 程式庫。載入時該服務會看到你的連線資訊，但看不到你的檔案。程式庫有加上完整性驗證，內容被竄改時瀏覽器會拒絕執行。</li>
+    <li><b>GoatCounter</b>：用來統計造訪人次，並顯示在頁尾。依其說明，它不使用 cookie，也不儲存可識別個人的資料。它收到的是「有人開啟了網頁」這類匿名資訊，<b>不會收到你的匯出檔或追蹤名單</b>。</li>
+  </ul>
+
+  <h2>我們不會做的事</h2>
+  <ul>
+    <li>不會要求你的 Instagram 密碼，也不會登入你的帳號。</li>
+    <li>不會出售或分享你的資料，因為我們根本沒有收集你的匯出檔。</li>
+    <li>不會使用廣告追蹤。</li>
+  </ul>
+
+  <h2>怎麼清除你的資料？</h2>
+  <ul>
+    <li>在網頁上傳框下方按「<b>要換分析另一個帳號？清除已儲存的資料</b>」，或在結果頁下方按「<b>🗑 清除所有資料</b>」。</li>
+    <li>也可以直接在瀏覽器設定裡清除這個網站的資料。</li>
+    <li>你也可以先按「下載歷史紀錄」備份。<b>歷史紀錄檔等同你的追蹤者名單</b>，請自行妥善保管。</li>
+  </ul>
+
+  <h2>提醒</h2>
+  <ul>
+    <li>本工具為個人獨立開發，與 Instagram 及 Meta 無關。</li>
+    <li>請只分析<b>你自己帳號</b>的匯出資料。</li>
+    <li>如果你用的是共用電腦，使用完畢後建議清除資料。</li>
+  </ul>
+
+  <h2>聯絡我</h2>
+  <p>有任何疑問，歡迎到 Instagram 私訊：<a href="https://www.instagram.com/mu_3.27" target="_blank" rel="noopener">@mu_3.27</a>。</p>
+</div>
+</main>
+</body>
+</html>

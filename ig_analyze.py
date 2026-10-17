@@ -63,10 +63,15 @@ def entries(obj):
         res.append((name, sld.get("timestamp", 0), sld.get("href", f"https://www.instagram.com/{name}"), ""))
     return res
 
+import re
+STRICT = {"followers": re.compile(r"^followers(_\d+)?\.json$", re.I),
+          "following": re.compile(r"^following(_\d+)?\.json$", re.I)}
+
 def collect(src, prefix):
     data = {}
     for fname, lst in src.items():
-        if fname.startswith(prefix):
+        ok = STRICT[prefix].match(fname) if prefix in STRICT else fname.startswith(prefix)
+        if ok:
             for obj in lst:
                 for n, ts, href, _ in entries(obj):
                     data[n] = (ts, href)
