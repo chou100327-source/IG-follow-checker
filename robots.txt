@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://ig-follow-checker-five.vercel.app/sitemap.xml
