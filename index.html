@@ -738,16 +738,27 @@ $("clr").onclick=clearAll;
 $("clr2").onclick=clearAll;
 
 // 訪客數（GoatCounter 公開計數；未啟用或失敗時不顯示）
+// 用首頁路徑的計數（「全站總數」端點的快取會落後好幾個小時）；載入時取一次，分頁開著時每 5 分鐘更新
 (function(){
-  const SHOW_MIN=1;
-  fetch("https://igtracker.goatcounter.com/counter/TOTAL.json").then(r=>r.ok?r.json():null).then(j=>{
-    if(!j||j.count==null)return;
-    const n=parseInt(String(j.count).replace(/\D/g,""),10);
-    if(!(n>=SHOW_MIN))return;
-    const el=$("visits");el.textContent="";
-    el.append("👀 已有 ");const b=document.createElement("b");b.textContent=n.toLocaleString("en-US");el.append(b," 人次造訪");
-    el.hidden=false;
-  }).catch(()=>{});
+  const SHOW_MIN=1, URL="https://igtracker.goatcounter.com/counter/%2F.json", el=$("visits");
+  let last=null;
+  const show=n=>{
+    if(n===last) return; last=n;
+    el.textContent=""; el.append("👀 已有 ");
+    const b=document.createElement("b"); b.textContent=n.toLocaleString("en-US");
+    el.append(b," 人次造訪"); el.hidden=false;
+  };
+  const update=force=>{
+    if(!force&&document.visibilityState==="hidden") return;   // 背景分頁不浪費請求
+    fetch(URL).then(r=>r.ok?r.json():null).then(j=>{
+      if(!j||j.count==null) return;
+      const n=parseInt(String(j.count).replace(/\D/g,""),10);
+      if(n>=SHOW_MIN) show(n);
+    }).catch(()=>{});
+  };
+  update(true);
+  setInterval(update,5*60*1000);
+  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")update()});
 })();
 </script>
 </body>
