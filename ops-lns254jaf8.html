@@ -111,7 +111,7 @@ tr.today td:first-child::after{content:" · 今天";color:var(--acc);font-size:.
 <div class="card"><h2>每日明細</h2>
   <label class="note" style="display:inline-flex;gap:6px;align-items:center;margin:-4px 0 8px;cursor:pointer"><input type="checkbox" id="hideZero" checked> 隱藏沒有任何紀錄的日子</label>
   <div class="scroll"><table id="table"></table></div>
-  <p class="note">日期以 GoatCounter 的時區（目前為 UTC）計算，台灣凌晨 0–8 點會算在前一天。</p>
+  <p class="note">日期以台灣時間（UTC+8）計算；需與 GoatCounter 後台 Settings 的 Timezone 設為 Asia/Taipei 一致。</p>
 </div>
 
 <p class="note">資料來源：網站送出的匿名事件（只有次數）。<b>這個後台看不到任何人的匯出檔、帳號或追蹤人數</b>，因為網站從來沒有收到。事件次數可能以同一次造訪為單位去重，是約略值，請以趨勢為主。</p>
@@ -138,10 +138,11 @@ const HINTS={
 };
 const PATHS=[HOME,...Object.keys(EVENTS)];
 const $=id=>document.getElementById(id);
-const CACHE_KEY=`igdash-days-v1-${SITE}`, SNAP_KEY=`igdash-snap-v1-${SITE}`;
+const CACHE_KEY=`igdash-days-v2-tz8-${SITE}`, SNAP_KEY=`igdash-snap-v1-${SITE}`;
 const store={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 const iso=d=>d.toISOString().slice(0,10);
-const utcToday=()=>{const n=new Date();return new Date(Date.UTC(n.getUTCFullYear(),n.getUTCMonth(),n.getUTCDate()))};
+const TZ_H=8; /* 與 GoatCounter 後台 Settings 的時區一致（Asia/Taipei = UTC+8） */
+const utcToday=()=>{const n=new Date(Date.now()+TZ_H*3600000);return new Date(Date.UTC(n.getUTCFullYear(),n.getUTCMonth(),n.getUTCDate()))};
 const addDays=(d,n)=>new Date(d.getTime()+n*86400000);
 const fmt=n=>Number(n).toLocaleString("en-US");
 const pct=(a,b)=>b?`${(a/b*100).toFixed(1)}%`:"—";
@@ -203,7 +204,7 @@ async function load(days){
     store.set(CACHE_KEY,cache);
     const daily=dates.map(d=>cache[iso(d)]);
     state={total,daily,days,asOf:new Date(),today:iso(today)};
-    render(); saveSnap(); setStatus(`最後更新 ${new Date().toLocaleTimeString("zh-TW",{hour12:false})}・每 2 分鐘自動更新（截至 UTC ${iso(today)}）`);
+    render(); saveSnap(); setStatus(`最後更新 ${new Date().toLocaleTimeString("zh-TW",{hour12:false})}・每 2 分鐘自動更新（截至 ${iso(today)}）`);
   }catch(e){
     setStatus(e.message||String(e),true);
   }finally{
@@ -280,7 +281,7 @@ function bars(host,rows,series,stacked){
 }
 function renderTable(){
   const t=$("table"); t.textContent="";
-  const head=el("tr"); ["日期(UTC)","造訪","範例","成功","失敗","成功率"].forEach(h=>head.append(el("th",null,h)));
+  const head=el("tr"); ["日期","造訪","範例","成功","失敗","成功率"].forEach(h=>head.append(el("th",null,h)));
   const thead=el("thead"); thead.append(head); t.append(thead);
   const hide=$("hideZero").checked;
   const rows=[...state.daily].reverse().filter(r=>!hide||r.date===state.today||PATHS.some(p=>r[p]>0));
@@ -299,7 +300,7 @@ function renderInsights(attempts,ok,fails){
   if(v&&attempts/v<0.1) add("⚠️","上傳比例偏低；多半是使用者還在等 IG 匯出完成，不一定是網站的問題。");
   if(v&&T.demo/v>0.3) add("ℹ️",`有 ${pct(T.demo,v)} 的人點了範例資料，代表範例有用，也代表很多人還沒準備好檔案。`);
   const peak=[...state.daily].sort((a,b)=>b[HOME]-a[HOME])[0];
-  if(peak&&peak[HOME]) add("📈",`造訪最高的一天是 ${peak.date}（UTC），共 ${peak[HOME]} 次。`);
+  if(peak&&peak[HOME]) add("📈",`造訪最高的一天是 ${peak.date}，共 ${peak[HOME]} 次。`);
 }
 function renderDelta(){
   const base=baseline, box=$("delta");
@@ -312,7 +313,7 @@ function renderDelta(){
 }
 function exportCsv(){
   if(!state) return;
-  const names=["日期(UTC)","首頁造訪",...Object.values(EVENTS)];
+  const names=["日期","首頁造訪",...Object.values(EVENTS)];
   const cell=v=>{v=String(v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
   const lines=[names.map(cell).join(",")];
   state.daily.forEach(r=>lines.push([r.date,r[HOME],...Object.keys(EVENTS).map(k=>r[k])].map(cell).join(",")));
