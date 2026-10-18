@@ -762,16 +762,17 @@ $("clr2").onclick=clearAll;
 
 // 訪客數（GoatCounter 公開計數；未啟用或失敗時不顯示）
 // GoatCounter 會以「完整網址」快取計數、而且常常快取好幾個小時。
-// 這裡每 5 分鐘換一個（本來就不影響結果的）起始日期參數，等於問一個新問題，才拿得到即時數字。
-// 另外保存「看過的最大值」，數字只增不減，避免被舊快取拉低。
+// 這裡每 2 分鐘換一個（本來就不影響結果的）起始日期參數，等於問一個新問題，才拿得到即時數字。
+// 不論分頁是否在前景都會更新；另外保存「看過的最大值」，數字只增不減，避免被舊快取拉低。
 (function(){
-  const SHOW_MIN=1, BUCKET=5*60*1000, KEEP="ig-visits-max-v1", el=$("visits");
+  const SHOW_MIN=1, BUCKET=2*60*1000, KEEP="ig-visits-max-v1", el=$("visits");
   const endpoint=()=>{
-    const n=Math.floor(Date.now()/BUCKET)%2000;                       // 約每 5 分鐘換一次，約 7 天輪一圈
+    const n=Math.floor(Date.now()/BUCKET)%2000;                       // 每 2 分鐘換一次，約 2.8 天輪一圈
     const d=new Date(Date.UTC(2020,0,1)+n*86400000).toISOString().slice(0,10);
     return `https://igtracker.goatcounter.com/counter/%2F.json?start=${d}`;   // 起始日早於網站上線，總數不變
   };
   let shownMax=Number(store.get(KEEP))||0;
+  const stamp=()=>{const d=new Date(),p=n=>String(n).padStart(2,"0");el.title=`每 2 分鐘自動更新・最後更新 ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`};
   const show=n=>{
     if(n<=shownMax&&!el.hidden) return;
     if(n>shownMax){shownMax=n;store.set(KEEP,n)}
@@ -779,18 +780,20 @@ $("clr2").onclick=clearAll;
     const b=document.createElement("b"); b.textContent=shownMax.toLocaleString("en-US");
     el.append(b," 人次造訪"); el.hidden=false;
   };
-  const update=force=>{
-    if(!force&&document.visibilityState==="hidden") return;   // 背景分頁不浪費請求
-    fetch(endpoint()).then(r=>r.ok?r.json():null).then(j=>{
+  const update=()=>{
+    fetch(endpoint(),{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{
       if(!j||j.count==null) return;
+      stamp();
       const n=parseInt(String(j.count).replace(/\D/g,""),10);
       if(n>=SHOW_MIN) show(n);
     }).catch(()=>{});
   };
   if(shownMax>=SHOW_MIN) show(shownMax);   // 先顯示上次看到的數字，避免空白，再用最新資料更新
-  update(true);
+  update();
   setInterval(update,BUCKET);
   document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")update()});
+  window.addEventListener("pageshow",e=>{if(e.persisted)update()});   // 從上一頁／手機切回來
+  window.addEventListener("online",update);
 })();
 </script>
 </body>
