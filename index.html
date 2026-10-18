@@ -212,7 +212,7 @@ footer .fine a{color:inherit;text-decoration:underline;display:inline-block;padd
   <div class="sum" id="sum"></div>
   <div class="asof" id="asof"></div>
   <div class="tabs" id="tabs" role="tablist" aria-label="清單分類"></div>
-  <div class="search"><svg viewBox="0 0 24 24" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" placeholder="搜尋帳號…"></div>
+  <div class="search"><svg viewBox="0 0 24 24" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" placeholder="搜尋帳號…" aria-label="搜尋帳號"></div>
   <div class="tools">
     <select id="sort" aria-label="排序">
       <option value="new">日期：新 → 舊</option>
@@ -301,7 +301,7 @@ footer .fine a{color:inherit;text-decoration:underline;display:inline-block;padd
     <dl>
       <dt>會不會需要我的 Instagram 密碼？</dt><dd>不會。本工具完全不需要登入你的帳號。</dd>
       <dt>我的資料安全嗎？</dt><dd>匯出檔只在你自己的瀏覽器中處理，不會上傳到任何伺服器。網站只會用不含 cookie 的方式匿名統計造訪人次，以及「完成了一次分析」「失敗的原因類別」這類次數，不會讀取或傳送你的檔案內容、帳號或人數。詳見<a href="privacy.html">隱私權說明</a>。</dd>
-      <dt>想換一個帳號分析（例如朋友的）？</dt><dd>歷史紀錄是跟著「這個瀏覽器」存的，不分帳號。換帳號前請在上傳框下方按「<b>清除已儲存的資料</b>」，免得兩個帳號的紀錄混在一起。如果你忘了清，上傳時工具發現追蹤者差異很大，也會詢問你是否要重新開始。</dd>
+      <dt>想換一個帳號分析（例如朋友的）？</dt><dd>歷史紀錄是跟著「這個瀏覽器」存的，不分帳號。換帳號前請在上傳框下方按「<b>清除資料</b>」，免得兩個帳號的紀錄混在一起。如果你忘了清，上傳時工具發現追蹤者差異很大，也會詢問你是否要重新開始。</dd>
       <dt>顯示「找不到追蹤資料」？</dt><dd>多半是格式選成 HTML，或沒勾選「追蹤者與追蹤中」。請重新匯出，格式選 JSON。</dd>
       <dt>數字和 Instagram 主頁差 1～2 個？</dt><dd>通常是已停用或被封鎖的帳號，屬於正常現象。</dd>
       <dt>怎麼切換深色／淺色模式？</dt><dd>點頁面最上方的 <b>Instagram 圖示</b>就會在深色與淺色之間切換，並記住你的選擇。預設是跟隨手機或電腦的系統設定。</dd>
@@ -401,6 +401,7 @@ async function readFiles(files){
     const path=f._path||f.webkitRelativePath||f.name;
     if(f.name.toLowerCase().endsWith(".zip")){
       if(f.size>400*1024*1024) throw fail(`這個檔案很大（約 ${Math.round(f.size/1048576)} MB），可能連照片或訊息一起匯出了，瀏覽器可能會當機。請重新匯出，只勾選「追蹤者與追蹤中」。`,"too-large");
+      if(typeof JSZip==="undefined") throw fail("解壓縮元件沒有載入成功（可能是網路或瀏覽器擴充功能擋住）。請重新整理頁面，或先把 zip 解壓縮後改選資料夾／JSON 檔。","lib");
       let z;
       try{z=await JSZip.loadAsync(f)}catch(e){throw fail("無法讀取這個 zip，檔案可能損毀，或不是 Instagram 的匯出檔。","bad-zip")}
       for(const n of Object.keys(z.files)){
@@ -463,15 +464,22 @@ function analyze(found,save=true){
     unfollowed:[...unf],
     pending:[...pend],
     lost:[],added:[],prevDate:null,persisted:true,
-    latest:Math.max(0,...[followers,following,unf,pend].flatMap(m=>[...m.values()]))
+    latest:[followers,following,unf,pend].reduce((mx,m)=>{for(const t of m.values())if(t>mx)mx=t;return mx},0)
   };
+  let keep=false;   // 重複上傳同一份檔案：沿用更早的比對基準，不然退追名單會被洗掉
   if(prev){
-    const pf=new Set(prev.followers);
-    d.lost=prev.followers.filter(n=>!followers.has(n)).map(n=>[n,now]);
+    let cmp=prev;
+    if(prev.base&&Array.isArray(prev.base.followers)&&prev.followers.length===followers.size&&prev.followers.every(n=>followers.has(n))){cmp=prev.base;keep=true}
+    const pf=new Set(cmp.followers);
+    d.lost=cmp.followers.filter(n=>!followers.has(n)).map(n=>[n,now]);
     d.added=[...followers.keys()].filter(n=>!pf.has(n)).map(n=>[n,now]);
-    d.prevDate=prev.date;
+    d.prevDate=cmp.date;
   }
-  if(save)d.persisted=store.set(KEY,{date:ymd(),followers:[...followers.keys()]});
+  if(save&&!keep){
+    const snap={date:ymd(),followers:[...followers.keys()]};
+    if(prev&&prev.followers.length<=50000)snap.base={date:prev.date,followers:prev.followers};
+    d.persisted=store.set(KEY,snap)||store.set(KEY,{date:snap.date,followers:snap.followers});
+  }
   return d;
 }
 
@@ -665,7 +673,7 @@ async function handle(files){
     track("analysis-ok","分析完成");
     track("source-"+kind,"來源："+kind);
   }catch(e){
-    setMsg(e.message);
+    setMsg(e&&e.code?e.message:"發生未預期的錯誤，請重新整理頁面再試一次；若一直失敗，請確認檔案是 Instagram 匯出的 JSON。");
     track("error-"+(e.code||"other"),"分析失敗："+(e.code||"other"));
   }
   $("drop").classList.remove("loading");
