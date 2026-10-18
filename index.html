@@ -123,6 +123,8 @@ li{animation:slide .45s both;margin-bottom:8px}
 @media(max-width:520px){.go{display:none}}
 .act{flex:none;min-height:40px;border:1px solid var(--line);background:var(--card);color:var(--mut);border-radius:999px;padding:8px 14px;font:inherit;font-size:.78rem;cursor:pointer;transition:all .2s}
 .act:hover{border-color:var(--acc);color:var(--acc)}
+.more{display:block;width:100%;min-height:44px;margin:4px 0 8px;border:1px dashed var(--line);background:var(--card);color:var(--acc);border-radius:16px;font:inherit;font-weight:600;font-size:.9rem;cursor:pointer;transition:background .2s,border-color .2s}
+.more:hover{background:var(--soft);border-color:var(--acc)}
 .empty{text-align:center;color:var(--mut);padding:36px 0;animation:rise .5s both}
 .empty big{display:block;font-size:2.2rem}
 
@@ -273,7 +275,7 @@ footer .fine a{color:inherit;text-decoration:underline;display:inline-block;padd
       <dt>已忽略</dt><dd>你按過「忽略」的帳號，會集中在這裡，可以隨時「還原」。</dd>
     </dl>
     <div class="tip"><b>常追蹤名人或品牌？</b>他們一定不會回追。在「對方未回追」或「我未回追」按帳號右邊的<b>忽略</b>，就會從清單和統計中隱藏。</div>
-    <div class="tip">點任一帳號會開啟對方的 Instagram 主頁。可用搜尋框找帳號、用下拉選單排序，也能<b>複製清單</b>或<b>下載 CSV</b>（用 Excel 或 Google 試算表開啟）。</div>
+    <div class="tip">點任一帳號會開啟對方的 Instagram 主頁。可用搜尋框找帳號、用下拉選單排序，也能<b>複製清單</b>或<b>下載 CSV</b>（用 Excel 或 Google 試算表開啟）。清單一次先顯示前 100 筆，按「<b>顯示更多</b>」可展開，複製和 CSV 一律包含<b>全部</b>。</div>
 
     <h2><i>5</i>怎麼看「誰退追我」與換裝置</h2>
     <ol>
@@ -313,14 +315,15 @@ footer .fine a{color:inherit;text-decoration:underline;display:inline-block;padd
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" integrity="sha512-XMVd28F1oH/O71fzwBnV7HucLxVwtxf26XV8P4wPk26EDxuGZ91N8bsOttmnomcCD3CS5ZMRL50H0GgOHvegtg==" crossorigin="anonymous"></script>
 <script>
 const $=id=>document.getElementById(id);
-const fix=s=>{try{return decodeURIComponent(escape(s))}catch(e){return s}};
+const fix=s=>{s=String(s??"");try{return decodeURIComponent(escape(s))}catch(e){return s}};
 const KEY="ig-follow-snapshot-v1", IKEY="ig-ignored-v1", NKEY="ig-names-v1";
 const ymd=()=>{const d=new Date(),p=n=>String(n).padStart(2,"0");return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`};
 const store={
   get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},
   set(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}
 };
-let data={}, tab="notBack", sortBy="new", demoMode=false;
+const PAGE=100, STEP=200;           // 清單先顯示前 100 筆，每次「顯示更多」再加 200 筆（大帳號才不會卡）
+let data={}, tab="notBack", sortBy="new", demoMode=false, shown=PAGE;
 let ignored=new Set(store.get(IKEY)||[]);
 let names=store.get(NKEY)||{};
 const saveIgnored=()=>{if(!demoMode)store.set(IKEY,[...ignored])};
@@ -341,7 +344,7 @@ function entries(obj){
     if(!it||typeof it!=="object") continue;
     if(it.label_values){
       let user="",dn="";
-      const lv=it.label_values;
+      const lv=Array.isArray(it.label_values)?it.label_values.filter(x=>x&&typeof x==="object"):[];
       for(const x of lv){
         const lab=fix(x.label||""),val=fix(x.value||"");
         if(USER_LABELS.includes(lab))user=val.trim(); else if(NAME_LABELS.includes(lab))dn=val.trim();
@@ -493,16 +496,17 @@ function renderSummary(anim=true){
 }
 function renderTabs(){
   $("tabs").innerHTML=TABS.map(([k,l])=>`<button role="tab" aria-selected="${k===tab}" data-k="${k}" class="${k===tab?"on":""}">${l}<i>${listFor(k).length}</i></button>`).join("");
-  $("tabs").querySelectorAll("button").forEach(b=>b.onclick=()=>{tab=b.dataset.k;renderTabs();renderList()});
+  $("tabs").querySelectorAll("button").forEach(b=>b.onclick=()=>{tab=b.dataset.k;shown=PAGE;renderTabs();renderList()});
 }
 function refreshCounts(){renderSummary(false);renderTabs();renderList()}
 
-function renderList(){
-  $("desc").textContent=TABS.find(x=>x[0]===tab)[2];
+function renderList(keepFocus=false){
   const ul=$("list"); ul.innerHTML="";
   const rows=visibleRows();
+  const base=TABS.find(x=>x[0]===tab)[2];
+  $("desc").textContent=base+(rows.length>shown?`（顯示前 ${shown.toLocaleString("en-US")} 筆，共 ${rows.length.toLocaleString("en-US")} 筆）`:"");
   const canIgnore=tab==="notBack"||tab==="fans", canRestore=tab==="ignored";
-  rows.forEach(([n,ts],i)=>{
+  rows.slice(0,shown).forEach(([n,ts],i)=>{
     const li=document.createElement("li");
     li.style.animationDelay=Math.min(i,14)*35+"ms";
     const wrap=document.createElement("div"); wrap.className="rowc";
@@ -525,6 +529,14 @@ function renderList(){
     }
     li.append(wrap); ul.append(li);
   });
+  if(rows.length>shown){
+    const li=document.createElement("li"), b=document.createElement("button");
+    b.className="more"; b.type="button";
+    b.textContent=`顯示更多（還有 ${(rows.length-shown).toLocaleString("en-US")} 筆）`;
+    b.onclick=()=>{shown+=STEP;renderList(true)};
+    li.append(b); ul.append(li);
+    if(keepFocus) b.focus({preventScroll:true});
+  }
   if(!rows.length){
     const e=document.createElement("div"); e.className="empty";
     e.innerHTML=`<big>${$("q").value.trim()?"🔍":"✨"}</big>`;
@@ -624,7 +636,7 @@ async function handle(files){
     const wasDemo=demoMode;
     const d=analyze(found);
     if(wasDemo){ignored=new Set(store.get(IKEY)||[]);demoMode=false} // 成功分析後才離開範例模式
-    data=d;tab="notBack";render();
+    data=d;tab="notBack";shown=PAGE;render();
     const kind=files.some(f=>/\.zip$/i.test(f.name))?"zip":files.some(f=>(f._path||"").includes("/"))?"folder":"json";
     track("analysis-ok","分析完成");
     track("source-"+kind,"來源："+kind);
@@ -653,7 +665,7 @@ function demo(){
   data.unfollowed=list([["spam.deals",5],["random.promo",14],["brand.store",40]]);
   data.pending=list([["private.user_a",2],["private.user_b",8]]);
   data.prevDate=null;
-  tab="notBack"; setMsg(""); render();
+  tab="notBack"; shown=PAGE; setMsg(""); render();
   $("note").innerHTML="這是<b>範例資料</b>（全為虛構帳號），用來展示各分頁功能。「流失追蹤者」與「新增追蹤者」需要你上傳過兩次匯出檔才會有真實資料。";
 }
 
@@ -731,8 +743,9 @@ $("dfile").onchange=e=>{
   if(!fs.length){setMsg("這個資料夾裡找不到 JSON 檔。請確認選的是解壓縮後的資料夾（裡面有 followers_and_following）。");return}
   handle(fs);
 };
-$("q").oninput=()=>{if(data.followers)renderList()};
-$("sort").onchange=e=>{sortBy=e.target.value;if(data.followers)renderList()};
+let qTimer=null;
+$("q").oninput=()=>{clearTimeout(qTimer);qTimer=setTimeout(()=>{shown=PAGE;if(data.followers)renderList()},120)};
+$("sort").onchange=e=>{sortBy=e.target.value;shown=PAGE;if(data.followers)renderList()};
 $("copy").onclick=copyList;
 $("csv").onclick=downloadCsv;
 $("hdl").onclick=downloadHistory;
