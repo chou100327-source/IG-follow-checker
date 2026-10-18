@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<title>後台統計｜IG 追蹤分析器</title>
+<script>try{const t=JSON.parse(localStorage.getItem("igdash-theme"));if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<style>
+:root{
+  --bg:#fafafa;--fg:#262626;--mut:#6b6b6b;--card:#fff;--line:#dbdbdb;--soft:#f2f2f2;
+  --grad:linear-gradient(45deg,#feda75,#fa7e1e 25%,#d62976 50%,#962fbf 75%,#4f5bd5);
+  --acc:#d62976;--blue:#0095f6;--ok:#1a8f4a;--bad:#ed4956;--warn:#c77700;
+}
+:root{color-scheme:light dark}
+:root[data-theme="light"]{color-scheme:light}
+:root[data-theme="dark"]{color-scheme:dark}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){--bg:#000;--fg:#f5f5f5;--mut:#a8a8a8;--card:#121212;--line:#262626;--soft:#1c1c1c;--acc:#ff4f9a;--ok:#4cd388;--bad:#ff6b76;--warn:#ffb340}
+}
+:root[data-theme="dark"]{--bg:#000;--fg:#f5f5f5;--mut:#a8a8a8;--card:#121212;--line:#262626;--soft:#1c1c1c;--acc:#ff4f9a;--ok:#4cd388;--bad:#ff6b76;--warn:#ffb340}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 -apple-system,BlinkMacSystemFont,"PingFang TC","Helvetica Neue",sans-serif}
+main{max-width:980px;margin:0 auto;padding:24px 16px 72px}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:6px}
+h1{margin:0;font-size:1.5rem;font-weight:800}
+h1 span{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+h2{margin:0 0 10px;font-size:1.02rem}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+select,button{min-height:40px;border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:999px;padding:6px 14px;font:inherit;font-size:.88rem;cursor:pointer;transition:border-color .2s,color .2s}
+select:hover,button:hover{border-color:var(--acc);color:var(--acc)}
+button:disabled{opacity:.5;cursor:default}
+.status{color:var(--mut);font-size:.82rem;margin:2px 0 16px;min-height:1.3em}
+.status.err{color:var(--bad)}
+.bar{height:3px;background:var(--soft);border-radius:3px;overflow:hidden;margin:0 0 14px;visibility:hidden}
+.bar.on{visibility:visible}
+.bar i{display:block;height:100%;width:0;background:var(--grad);transition:width .25s}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}
+.kpi small{display:block;color:var(--mut);font-size:.78rem}
+.kpi b{display:block;font-size:1.9rem;font-weight:800;line-height:1.2;font-variant-numeric:tabular-nums}
+.kpi em{font-style:normal;font-size:.78rem;color:var(--mut)}
+.kpi.ok b{color:var(--ok)}.kpi.bad b{color:var(--bad)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:720px){.grid2{grid-template-columns:1fr}}
+.row{display:grid;grid-template-columns:minmax(110px,150px) 1fr auto;gap:10px;align-items:center;margin:7px 0;font-size:.88rem}
+.row .t{height:14px;background:var(--soft);border-radius:7px;overflow:hidden}
+.row .t i{display:block;height:100%;border-radius:7px;min-width:2px}
+.row .n{font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.row .n small{color:var(--mut)}
+@media(max-width:520px){.row{grid-template-columns:1fr auto;row-gap:4px}.row .t{grid-column:1/-1;order:3}}
+.hint{color:var(--mut);font-size:.8rem;margin:-2px 0 8px 0}
+svg{width:100%;height:auto;display:block}
+svg text{fill:var(--mut);font-size:10px}
+svg .grid{stroke:var(--line);stroke-width:1}
+.legend{display:flex;gap:14px;flex-wrap:wrap;color:var(--mut);font-size:.8rem;margin-top:6px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+table{border-collapse:collapse;width:100%;font-size:.86rem}
+th,td{padding:7px 8px;text-align:right;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--mut);font-weight:600;position:sticky;top:0;background:var(--card)}
+.scroll{max-height:380px;overflow:auto}
+tr.today td:first-child::after{content:" · 今天";color:var(--acc);font-size:.75rem}
+.insights p{margin:6px 0}
+.note{color:var(--mut);font-size:.8rem}
+.empty{color:var(--mut);padding:10px 0}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <h1>後台<span>統計</span></h1>
+  <div class="ctrl">
+    <select id="range" aria-label="統計範圍">
+      <option value="7">最近 7 天</option>
+      <option value="14" selected>最近 14 天</option>
+      <option value="30">最近 30 天</option>
+      <option value="60">最近 60 天</option>
+    </select>
+    <button id="theme" type="button">🌓 自動</button>
+    <button id="refresh" type="button">↻ 重新整理</button>
+    <button id="csv" type="button">下載 CSV</button>
+  </div>
+</header>
+<div class="status" id="status">載入中…</div>
+<div class="bar" id="bar"><i></i></div>
+
+<section class="kpis" id="kpis"></section>
+<div class="card" id="delta" hidden></div>
+
+<div class="card">
+  <h2>使用漏斗</h2>
+  <div id="funnel"></div>
+</div>
+
+<div class="grid2">
+  <div class="card"><h2>每日造訪</h2><div id="chartVisits"></div></div>
+  <div class="card"><h2>每日上傳結果</h2><div id="chartUploads"></div>
+    <div class="legend"><span><i style="background:var(--ok)"></i>成功</span><span><i style="background:var(--bad)"></i>失敗</span></div></div>
+</div>
+
+<div class="grid2">
+  <div class="card"><h2>上傳方式（成功的分析）</h2><div id="sources"></div></div>
+  <div class="card"><h2>失敗原因</h2><div id="errors"></div></div>
+</div>
+
+<div class="card insights"><h2>重點觀察</h2><div id="insights"></div></div>
+
+<div class="card"><h2>每日明細</h2>
+  <label class="note" style="display:inline-flex;gap:6px;align-items:center;margin:-4px 0 8px;cursor:pointer"><input type="checkbox" id="hideZero" checked> 隱藏沒有任何紀錄的日子</label>
+  <div class="scroll"><table id="table"></table></div>
+  <p class="note">日期以 GoatCounter 的時區（目前為 UTC）計算，台灣凌晨 0–8 點會算在前一天。</p>
+</div>
+
+<p class="note">資料來源：網站送出的匿名事件（只有次數）。<b>這個後台看不到任何人的匯出檔、帳號或追蹤人數</b>，因為網站從來沒有收到。事件次數可能以同一次造訪為單位去重，是約略值，請以趨勢為主。</p>
+</main>
+
+<script>
+const SITE=new URLSearchParams(location.search).get("site")||"igtracker";
+const HOME="/";
+const EVENTS={
+  "analysis-ok":"成功分析","demo":"點範例資料",
+  "source-zip":"zip","source-json":"JSON 檔","source-folder":"資料夾",
+  "error-html":"選成 HTML 格式","error-bad-zip":"zip 損毀／非 IG 匯出檔","error-no-data":"找不到追蹤資料",
+  "error-too-large":"檔案太大","error-unreadable":"誤傳資料夾","error-other":"其他錯誤"
+};
+const ERRORS=Object.keys(EVENTS).filter(k=>k.startsWith("error-"));
+const SOURCES=["source-zip","source-json","source-folder"];
+const HINTS={
+  "error-html":"匯出時格式選成 HTML。教學要把「格式選 JSON」寫得更醒目。",
+  "error-bad-zip":"檔案損毀、下載不完整，或傳錯檔案。",
+  "error-no-data":"沒勾「追蹤者與追蹤中」，或 IG 改了匯出格式（要特別留意）。",
+  "error-too-large":"連照片或訊息一起匯出了。要強調「只勾追蹤者與追蹤中」。",
+  "error-unreadable":"把資料夾當檔案上傳。手機請用「選擇 JSON 檔」，電腦請拖曳資料夾。",
+  "error-other":"未分類的錯誤，值得回頭檢查程式。"
+};
+const PATHS=[HOME,...Object.keys(EVENTS)];
+const $=id=>document.getElementById(id);
+const CACHE_KEY=`igdash-days-v1-${SITE}`, SNAP_KEY=`igdash-snap-v1-${SITE}`;
+const store={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const iso=d=>d.toISOString().slice(0,10);
+const utcToday=()=>{const n=new Date();return new Date(Date.UTC(n.getUTCFullYear(),n.getUTCMonth(),n.getUTCDate()))};
+const addDays=(d,n)=>new Date(d.getTime()+n*86400000);
+const fmt=n=>Number(n).toLocaleString("en-US");
+const pct=(a,b)=>b?`${(a/b*100).toFixed(1)}%`:"—";
+
+class CounterError extends Error{}
+
+/* ---------- 取得計數 ----------
+   GoatCounter 以「完整網址」快取計數、常常好幾個小時；加上隨機的未來 end 日期，每次都是新查詢，才拿得到即時數字。 */
+async function since(path,day){
+  const end=iso(addDays(new Date(Date.UTC(2027,0,1)),Math.floor(Math.random()*3000)));
+  const url=`https://${SITE}.goatcounter.com/counter/${encodeURIComponent(path)}.json?start=${iso(day)}&end=${end}`;
+  let last;
+  for(let i=0;i<3;i++){
+    try{
+      const r=await fetch(url,{cache:"no-store"});
+      if(r.status===403) throw new CounterError("GoatCounter 回 403：請到後台 Settings 開啟「Allow adding visitor counts on your website」。");
+      if(r.status===404) return 0;                                  // 這個事件還沒有人觸發過
+      if(!r.ok) throw new Error("HTTP "+r.status);
+      const j=await r.json();
+      return parseInt(String(j.count??"0").replace(/\D/g,""),10)||0;
+    }catch(e){ if(e instanceof CounterError) throw e; last=e; await new Promise(r=>setTimeout(r,500*(i+1))) }
+  }
+  throw new CounterError("連不上 GoatCounter："+(last&&last.message||"網路錯誤"));
+}
+async function pool(jobs,limit,onProgress){
+  const out=new Array(jobs.length); let next=0,done=0;
+  async function worker(){ while(next<jobs.length){ const i=next++; out[i]=await jobs[i](); onProgress&&onProgress(++done,jobs.length) } }
+  await Promise.all(Array.from({length:Math.min(limit,jobs.length)},worker));
+  return out;
+}
+
+/* ---------- 載入資料 ----------
+   某日的數字 = 「從該日起的累計」減「從隔日起的累計」。已結束的日子數字不會再變，存在瀏覽器裡，之後不再重抓。 */
+let state=null, loading=false;
+async function load(days){
+  if(loading) return; loading=true;
+  $("refresh").disabled=true; $("bar").classList.add("on"); setStatus("載入中…");
+  try{
+    const today=utcToday(), now=Date.now();
+    const dates=Array.from({length:days},(_,i)=>addDays(today,-(days-1-i)));
+    const cache=store.get(CACHE_KEY)||{};
+    const need=dates.filter(d=>!(cache[iso(d)]&&cache[iso(d)].final));
+    const bounds=new Map();                                            // 需要查「累計」的起始日
+    for(const d of need){bounds.set(iso(d),d); const nx=addDays(d,1); if(nx<=today) bounds.set(iso(nx),nx)}
+    const ALL0=new Date(Date.UTC(2020,4,5));
+    const totals=await pool(PATHS.map(p=>()=>since(p,ALL0)),8);        // 先查全部期間
+    const total={}; PATHS.forEach((p,i)=>total[p]=totals[i]);
+    const active=PATHS.filter(p=>total[p]>0);                           // 總數為 0 的，每天一定也是 0，不必再查
+    const jobs=[], keys=[];
+    for(const [k,d] of bounds) active.forEach(p=>{ keys.push([p,k]); jobs.push(()=>since(p,d)) });
+    const res=await pool(jobs,8,(n,t)=>{$("bar").firstElementChild.style.width=`${n/t*100}%`; setStatus(`載入中… ${n}/${t}`)});
+    const map={}; keys.forEach(([p,k],i)=>{map[p+"|"+k]=res[i]});
+    for(const d of need){
+      const k=iso(d), nk=iso(addDays(d,1)), row={date:k};
+      PATHS.forEach(p=>{ const a=map[p+"|"+k]||0, b=bounds.has(nk)?(map[p+"|"+nk]||0):0; row[p]=Math.max(0,a-b) });   // 「明天起」一定是 0
+      row.final = now > addDays(d,1).getTime()+10*60*1000;           // 當天結束 10 分鐘後才算定稿
+      cache[k]=row;
+    }
+    store.set(CACHE_KEY,cache);
+    const daily=dates.map(d=>cache[iso(d)]);
+    state={total,daily,days,asOf:new Date(),today:iso(today)};
+    render(); saveSnap(); setStatus(`最後更新 ${new Date().toLocaleTimeString("zh-TW",{hour12:false})}・每 2 分鐘自動更新（截至 UTC ${iso(today)}）`);
+  }catch(e){
+    setStatus(e.message||String(e),true);
+  }finally{
+    loading=false; $("refresh").disabled=false; setTimeout(()=>$("bar").classList.remove("on"),300);
+  }
+}
+function setStatus(t,err){const s=$("status");s.textContent=t;s.className="status"+(err?" err":"")}
+
+/* ---------- 畫面 ---------- */
+const sumE=(o,keys)=>keys.reduce((a,k)=>a+(o[k]||0),0);
+function el(tag,cls,text){const e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e}
+
+function render(){
+  const T=state.total, today=state.daily[state.daily.length-1];
+  const ok=T["analysis-ok"], fails=sumE(T,ERRORS), attempts=ok+fails;
+  // KPI
+  const kp=[
+    ["首頁造訪",T[HOME],`今天 +${today[HOME]}`,""],
+    ["點範例資料",T.demo,`今天 +${today.demo}`,""],
+    ["實際上傳檔案",attempts,`今天 +${today["analysis-ok"]+sumE(today,ERRORS)}`,""],
+    ["成功分析",ok,`今天 +${today["analysis-ok"]}`,"ok"],
+    ["失敗",fails,`今天 +${sumE(today,ERRORS)}`,"bad"],
+    ["成功率",pct(ok,attempts),attempts?`${ok} / ${attempts}`:"尚無上傳",""]
+  ];
+  const box=$("kpis"); box.textContent="";
+  kp.forEach(([l,v,s,c])=>{const k=el("div","kpi "+c);k.append(el("small",null,l),el("b",null,typeof v==="number"?fmt(v):v),el("em",null,s));box.append(k)});
+  renderDelta();
+  // 漏斗
+  const f=$("funnel"); f.textContent="";
+  [["首頁造訪",T[HOME],T[HOME],"var(--blue)"],["點範例資料",T.demo,T[HOME],"#962fbf"],["實際上傳",attempts,T[HOME],"var(--acc)"],["　成功",ok,T[HOME],"var(--ok)"],["　失敗",fails,T[HOME],"var(--bad)"]]
+    .forEach(([l,v,base,color])=>f.append(rowEl(l,v,base,color,`佔造訪 ${pct(v,base)}`)));
+  // 圖表
+  bars($("chartVisits"),state.daily,[{key:HOME,color:"var(--blue)"}]);
+  bars($("chartUploads"),state.daily,[{key:"analysis-ok",color:"var(--ok)"},{key:"_fail",color:"var(--bad)"}],true);
+  // 上傳方式
+  const s=$("sources"); s.textContent=""; const ssum=sumE(T,SOURCES);
+  if(!ssum) s.append(el("div","empty","還沒有成功的分析。"));
+  SOURCES.forEach(k=>{ if(ssum) s.append(rowEl(EVENTS[k],T[k],ssum,"var(--acc)",pct(T[k],ssum))) });
+  // 失敗原因
+  const er=$("errors"); er.textContent="";
+  if(!fails) er.append(el("div","empty","目前沒有失敗紀錄 🎉"));
+  [...ERRORS].sort((a,b)=>T[b]-T[a]).filter(k=>T[k]).forEach(k=>{
+    er.append(rowEl(EVENTS[k],T[k],fails,"var(--bad)",pct(T[k],fails))); er.append(el("div","hint","→ "+HINTS[k]));
+  });
+  // 明細
+  renderTable(); renderInsights(attempts,ok,fails);
+}
+function rowEl(label,v,base,color,extra){
+  const r=el("div","row"), t=el("div","t"), i=el("i"); i.style.width=base?`${Math.max(v/base*100,v?1.5:0)}%`:"0"; i.style.background=color; t.append(i);
+  const n=el("div","n",fmt(v)); if(extra){const sm=el("small",null,"  "+extra); n.append(sm)}
+  r.append(el("div",null,label),t,n); return r;
+}
+function bars(host,rows,series,stacked){
+  host.textContent="";
+  const W=460,H=170,L=30,B=22,T=8,R=6, cw=(W-L-R)/rows.length;
+  const vals=rows.map(r=>{ const o={}; series.forEach(s=>o[s.key]=s.key==="_fail"?sumE(r,ERRORS):(r[s.key]||0)); return o });
+  const mx=Math.max(1,...vals.map(o=>stacked?series.reduce((a,s)=>a+o[s.key],0):Math.max(...series.map(s=>o[s.key]))));
+  const nice=(()=>{const p=Math.pow(10,Math.floor(Math.log10(mx)));const m=mx/p;return (m<=1?1:m<=2?2:m<=5?5:10)*p})();
+  const ns="http://www.w3.org/2000/svg", svg=document.createElementNS(ns,"svg"); svg.setAttribute("viewBox",`0 0 ${W} ${H}`); svg.setAttribute("role","img");
+  const add=(tag,attrs,text)=>{const e=document.createElementNS(ns,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(text!=null)e.textContent=text;svg.append(e);return e};
+  for(let i=0;i<=4;i++){const y=T+(H-T-B)*(1-i/4); add("line",{x1:L,x2:W-R,y1:y,y2:y,class:"grid"}); add("text",{x:L-4,y:y+3,"text-anchor":"end"},fmt(Math.round(nice*i/4)))}
+  rows.forEach((r,i)=>{
+    const o=vals[i], x=L+i*cw, bw=Math.max(2,cw*(stacked?0.62:0.62)); let acc=0;
+    series.forEach((s,j)=>{
+      const v=o[s.key], h=(H-T-B)*v/nice; if(!v) return;
+      const y=stacked?H-B-(acc+v)/nice*(H-T-B):H-B-h, xx=stacked?x+(cw-bw)/2:x+(cw-bw)/2+j*bw/series.length, w=stacked?bw:bw/series.length;
+      const rect=add("rect",{x:xx,y,width:w,height:Math.max(h,1),rx:2,fill:s.color});
+      const tip=document.createElementNS(ns,"title"); tip.textContent=`${r.date}：${s.key==="_fail"?"失敗":s.key==="analysis-ok"?"成功":"造訪"} ${v}`; rect.append(tip);
+      acc+=v;
+    });
+    if(rows.length<=16||i%Math.ceil(rows.length/10)===0) add("text",{x:x+cw/2,y:H-6,"text-anchor":"middle"},r.date.slice(5));
+  });
+  host.append(svg);
+}
+function renderTable(){
+  const t=$("table"); t.textContent="";
+  const head=el("tr"); ["日期(UTC)","造訪","範例","成功","失敗","成功率"].forEach(h=>head.append(el("th",null,h)));
+  const thead=el("thead"); thead.append(head); t.append(thead);
+  const hide=$("hideZero").checked;
+  const rows=[...state.daily].reverse().filter(r=>!hide||r.date===state.today||PATHS.some(p=>r[p]>0));
+  const tb=el("tbody"); rows.forEach(r=>{
+    const f=sumE(r,ERRORS), tr=el("tr",r.date===state.today?"today":"");
+    [r.date,r[HOME],r.demo,r["analysis-ok"],f,pct(r["analysis-ok"],r["analysis-ok"]+f)].forEach(v=>tr.append(el("td",null,typeof v==="number"?fmt(v):v))); tb.append(tr);
+  }); t.append(tb);
+  if(!rows.length){const tr=el("tr"),td=el("td","empty","這段期間沒有任何紀錄。");td.colSpan=6;tr.append(td);tb.append(tr)}
+}
+function renderInsights(attempts,ok,fails){
+  const T=state.total, v=T[HOME], box=$("insights"); box.textContent="";
+  const add=(icon,text)=>box.append(el("p",null,icon+" "+text));
+  if(!attempts){ add("ℹ️","還沒有人實際上傳過檔案。"); return }
+  add("📊",`${pct(attempts,v)} 的造訪者實際上傳了檔案（${attempts} / ${v}）；其中 ${pct(ok,attempts)} 成功。`);
+  if(fails/attempts>0.25){ const top=[...ERRORS].sort((a,b)=>T[b]-T[a])[0]; add("⚠️",`失敗率 ${pct(fails,attempts)} 偏高，最大宗是「${EVENTS[top]}」（${T[top]} 次）。${HINTS[top]}`) }
+  if(v&&attempts/v<0.1) add("⚠️","上傳比例偏低；多半是使用者還在等 IG 匯出完成，不一定是網站的問題。");
+  if(v&&T.demo/v>0.3) add("ℹ️",`有 ${pct(T.demo,v)} 的人點了範例資料，代表範例有用，也代表很多人還沒準備好檔案。`);
+  const peak=[...state.daily].sort((a,b)=>b[HOME]-a[HOME])[0];
+  if(peak&&peak[HOME]) add("📈",`造訪最高的一天是 ${peak.date}（UTC），共 ${peak[HOME]} 次。`);
+}
+function renderDelta(){
+  const base=baseline, box=$("delta");
+  if(!base){box.hidden=true;return}
+  const names={[HOME]:"首頁造訪",...EVENTS}, parts=[];
+  PATHS.forEach(p=>{const d=state.total[p]-(base.total[p]||0); if(d>0) parts.push(`${names[p]} +${d}`)});
+  box.hidden=false; box.textContent="";
+  const when=new Date(base.at).toLocaleString("zh-TW",{hour12:false});
+  box.append(el("b",null,"自上次開啟後（"+when+"）"),el("span",null,parts.length?"　新增："+parts.join("、"):"　沒有新增紀錄"));
+}
+function exportCsv(){
+  if(!state) return;
+  const names=["日期(UTC)","首頁造訪",...Object.values(EVENTS)];
+  const cell=v=>{v=String(v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
+  const lines=[names.map(cell).join(",")];
+  state.daily.forEach(r=>lines.push([r.date,r[HOME],...Object.keys(EVENTS).map(k=>r[k])].map(cell).join(",")));
+  const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob(["﻿"+lines.join("\r\n")],{type:"text/csv;charset=utf-8"}));
+  a.download=`igtracker-stats-${iso(new Date())}.csv`; document.body.append(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+
+var baseline=store.get(SNAP_KEY);
+var saveSnap=()=>{ if(state) store.set(SNAP_KEY,{at:new Date().toISOString(),total:state.total}) };
+$("range").value=String(store.get("igdash-range")||14);
+$("range").onchange=e=>{store.set("igdash-range",+e.target.value);load(+e.target.value)};
+$("refresh").onclick=()=>load(+$("range").value);
+$("csv").onclick=exportCsv;
+const THEMES=["auto","light","dark"], THEME_LABEL={auto:"🌓 自動",light:"☀️ 淺色",dark:"🌙 深色"};
+let theme=store.get("igdash-theme"); if(!THEMES.includes(theme)) theme="auto";
+function applyTheme(t){
+  if(t==="auto") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme",t);
+  const b=$("theme"); b.textContent=THEME_LABEL[t]; b.setAttribute("aria-label",`深淺模式：${THEME_LABEL[t].replace(/^\S+\s*/,"")}，點擊切換`); b.title="切換：自動（跟隨系統）→ 淺色 → 深色";
+}
+applyTheme(theme);
+$("theme").onclick=()=>{theme=THEMES[(THEMES.indexOf(theme)+1)%THEMES.length];store.set("igdash-theme",theme);applyTheme(theme)};
+$("hideZero").onchange=()=>{if(state)renderTable()};
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")load(+$("range").value)});
+setInterval(()=>load(+$("range").value),2*60*1000);
+load(+$("range").value);
+</script>
+</body>
+</html>
