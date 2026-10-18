@@ -22,15 +22,20 @@
 <meta name="twitter:title" content="IG 追蹤分析器：誰沒回追、誰退追，一次看清楚">
 <meta name="twitter:description" content="免費、不用登入 Instagram。上傳官方匯出檔，幾秒找出沒回追與退追的人。">
 <meta name="twitter:image" content="https://ig-follow-checker-five.vercel.app/og-image.png">
+<script>try{let t=localStorage.getItem("ig-theme-v1");try{t=JSON.parse(t)}catch(e){}if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
 <style>
 :root{
   --bg:#fafafa;--fg:#262626;--mut:#6b6b6b;--card:#fff;--line:#dbdbdb;--soft:#f2f2f2;
   --grad:linear-gradient(45deg,#feda75,#fa7e1e 25%,#d62976 50%,#962fbf 75%,#4f5bd5);
   --acc:#d62976;--blue:#0095f6;--ok:#1a8f4a;--err:#ed4956;
 }
+:root{color-scheme:light dark}
+:root[data-theme="light"]{color-scheme:light}
+:root[data-theme="dark"]{color-scheme:dark}
 @media (prefers-color-scheme:dark){
-  :root{--bg:#000;--fg:#f5f5f5;--mut:#a8a8a8;--card:#121212;--line:#262626;--soft:#1c1c1c;--acc:#ff4f9a;--ok:#4cd388}
+  :root:not([data-theme="light"]){--bg:#000;--fg:#f5f5f5;--mut:#a8a8a8;--card:#121212;--line:#262626;--soft:#1c1c1c;--acc:#ff4f9a;--ok:#4cd388}
 }
+:root[data-theme="dark"]{--bg:#000;--fg:#f5f5f5;--mut:#a8a8a8;--card:#121212;--line:#262626;--soft:#1c1c1c;--acc:#ff4f9a;--ok:#4cd388}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{scroll-behavior:smooth}
 body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 -apple-system,BlinkMacSystemFont,"PingFang TC","Helvetica Neue",sans-serif;overflow-x:hidden}
@@ -44,7 +49,12 @@ main{max-width:720px;margin:0 auto;padding:40px 16px 80px}
 header{text-align:center;margin-bottom:28px;animation:rise .7s both}
 .logo{width:68px;height:68px;margin:0 auto 14px;border-radius:20px;background:var(--grad);background-size:200% 200%;
   display:grid;place-items:center;animation:shift 6s ease infinite,float 4s ease-in-out infinite;box-shadow:0 10px 30px rgba(214,41,118,.35)}
+.logo{cursor:pointer;-webkit-user-select:none;user-select:none}
+.logo:focus-visible{outline:3px solid var(--blue);outline-offset:4px}
+.logo:active{transform:scale(.92)}
 .logo svg{width:34px;height:34px;stroke:#fff;fill:none;stroke-width:2}
+.logo svg.spin{animation:spin1 .55s ease}
+@keyframes spin1{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 @keyframes shift{50%{background-position:100% 100%}}
 @keyframes float{50%{transform:translateY(-6px) rotate(-3deg)}}
 h1{font-size:2rem;margin:0;letter-spacing:-.5px;font-weight:800}
@@ -173,7 +183,7 @@ footer .fine a{color:inherit;text-decoration:underline;display:inline-block;padd
 <div class="glow"></div>
 <main>
 <header>
-  <div class="logo"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5.5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r=".6" fill="#fff"/></svg></div>
+  <div class="logo" id="logo" role="button" tabindex="0" aria-label="切換深淺色"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5.5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r=".6" fill="#fff"/></svg></div>
   <h1>IG <span>追蹤分析器</span></h1>
   <p class="sub">誰沒回追你、你沒回追誰、誰默默退追，一次看清楚</p>
 </header>
@@ -294,6 +304,7 @@ footer .fine a{color:inherit;text-decoration:underline;display:inline-block;padd
       <dt>想換一個帳號分析（例如朋友的）？</dt><dd>歷史紀錄是跟著「這個瀏覽器」存的，不分帳號。換帳號前請在上傳框下方按「<b>清除已儲存的資料</b>」，免得兩個帳號的紀錄混在一起。如果你忘了清，上傳時工具發現追蹤者差異很大，也會詢問你是否要重新開始。</dd>
       <dt>顯示「找不到追蹤資料」？</dt><dd>多半是格式選成 HTML，或沒勾選「追蹤者與追蹤中」。請重新匯出，格式選 JSON。</dd>
       <dt>數字和 Instagram 主頁差 1～2 個？</dt><dd>通常是已停用或被封鎖的帳號，屬於正常現象。</dd>
+      <dt>怎麼切換深色／淺色模式？</dt><dd>點頁面最上方的 <b>Instagram 圖示</b>就會在深色與淺色之間切換，並記住你的選擇。預設是跟隨手機或電腦的系統設定。</dd>
       <dt>帳號名稱顯示的是 ID，不是暱稱？</dt><dd>Instagram 匯出的追蹤名單只有帳號 ID，沒有暱稱與頭貼。部分帳號（例如密友、追蹤請求）的檔案裡有名稱，會自動顯示。</dd>
     </dl>
 
@@ -332,6 +343,19 @@ const esc=t=>String(t).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"
 const track=(name,title)=>{try{if(window.goatcounter&&typeof window.goatcounter.count==="function")window.goatcounter.count({path:name,title:title||name,event:true})}catch(e){}};
 const fail=(msg,code)=>{const e=new Error(msg);e.code=code;return e};
 const setMsg=(t,ok=false)=>{const m=$("msg");m.textContent=t;m.className=ok?"ok":""};
+
+/* ---------- 深淺色：點最上方的 IG 圖示切換 ---------- */
+const isDark=()=>{const t=document.documentElement.getAttribute("data-theme");return t?t==="dark":matchMedia("(prefers-color-scheme:dark)").matches};
+function syncLogoLabel(){const l=$("logo");l.setAttribute("aria-label",`切換深淺色（目前：${isDark()?"深色":"淺色"}）`);l.title=isDark()?"點一下切換成淺色":"點一下切換成深色"}
+function toggleTheme(){
+  const next=isDark()?"light":"dark";
+  document.documentElement.setAttribute("data-theme",next); store.set("ig-theme-v1",next); syncLogoLabel();
+  const sv=$("logo").querySelector("svg"); sv.classList.remove("spin"); void sv.getBoundingClientRect(); sv.classList.add("spin");   // 小小的旋轉回饋
+}
+syncLogoLabel();
+$("logo").onclick=toggleTheme;
+$("logo").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();toggleTheme()}};
+matchMedia("(prefers-color-scheme:dark)").addEventListener?.("change",syncLogoLabel);
 
 /* ---------- 解析 ---------- */
 const USER_LABELS=["用戶名稱","用户名","用户名称","Username","username"], NAME_LABELS=["名稱","名称","Name","name"];

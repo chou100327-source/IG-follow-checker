@@ -5,12 +5,17 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <title>隱私權說明｜IG 追蹤分析器</title>
+<script>try{let t=localStorage.getItem("ig-theme-v1");try{t=JSON.parse(t)}catch(e){}if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
 <meta name="description" content="IG 追蹤分析器如何處理你的資料：匯出檔只在瀏覽器處理、不上傳；說明儲存了什麼、使用了哪些第三方服務，以及如何清除。">
 <link rel="canonical" href="https://ig-follow-checker-five.vercel.app/privacy.html">
 <meta name="theme-color" content="#d62976">
 <style>
 :root{--bg:#fafafa;--fg:#262626;--mut:#6b6b6b;--card:#fff;--line:#dbdbdb;--soft:#f2f2f2;--acc:#d62976;--grad:linear-gradient(45deg,#feda75,#fa7e1e 25%,#d62976 50%,#962fbf 75%,#4f5bd5)}
-@media (prefers-color-scheme:dark){:root{--bg:#000;--fg:#f5f5f5;--mut:#a8a8a8;--card:#121212;--line:#262626;--soft:#1c1c1c;--acc:#ff4f9a}}
+:root{color-scheme:light dark}
+:root[data-theme="light"]{color-scheme:light}
+:root[data-theme="dark"]{color-scheme:dark}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#000;--fg:#f5f5f5;--mut:#a8a8a8;--card:#121212;--line:#262626;--soft:#1c1c1c;--acc:#ff4f9a}}
+:root[data-theme="dark"]{--bg:#000;--fg:#f5f5f5;--mut:#a8a8a8;--card:#121212;--line:#262626;--soft:#1c1c1c;--acc:#ff4f9a}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.75 -apple-system,BlinkMacSystemFont,"PingFang TC","Helvetica Neue",sans-serif}
 main{max-width:720px;margin:0 auto;padding:32px 16px 72px}
