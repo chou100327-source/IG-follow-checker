@@ -761,26 +761,35 @@ $("clr").onclick=clearAll;
 $("clr2").onclick=clearAll;
 
 // 訪客數（GoatCounter 公開計數；未啟用或失敗時不顯示）
-// 用首頁路徑的計數（「全站總數」端點的快取會落後好幾個小時）；載入時取一次，分頁開著時每 5 分鐘更新
+// GoatCounter 會以「完整網址」快取計數、而且常常快取好幾個小時。
+// 這裡每 5 分鐘換一個（本來就不影響結果的）起始日期參數，等於問一個新問題，才拿得到即時數字。
+// 另外保存「看過的最大值」，數字只增不減，避免被舊快取拉低。
 (function(){
-  const SHOW_MIN=1, URL="https://igtracker.goatcounter.com/counter/%2F.json", el=$("visits");
-  let last=null;
+  const SHOW_MIN=1, BUCKET=5*60*1000, KEEP="ig-visits-max-v1", el=$("visits");
+  const endpoint=()=>{
+    const n=Math.floor(Date.now()/BUCKET)%2000;                       // 約每 5 分鐘換一次，約 7 天輪一圈
+    const d=new Date(Date.UTC(2020,0,1)+n*86400000).toISOString().slice(0,10);
+    return `https://igtracker.goatcounter.com/counter/%2F.json?start=${d}`;   // 起始日早於網站上線，總數不變
+  };
+  let shownMax=Number(store.get(KEEP))||0;
   const show=n=>{
-    if(n===last) return; last=n;
+    if(n<=shownMax&&!el.hidden) return;
+    if(n>shownMax){shownMax=n;store.set(KEEP,n)}
     el.textContent=""; el.append("👀 已有 ");
-    const b=document.createElement("b"); b.textContent=n.toLocaleString("en-US");
+    const b=document.createElement("b"); b.textContent=shownMax.toLocaleString("en-US");
     el.append(b," 人次造訪"); el.hidden=false;
   };
   const update=force=>{
     if(!force&&document.visibilityState==="hidden") return;   // 背景分頁不浪費請求
-    fetch(URL).then(r=>r.ok?r.json():null).then(j=>{
+    fetch(endpoint()).then(r=>r.ok?r.json():null).then(j=>{
       if(!j||j.count==null) return;
       const n=parseInt(String(j.count).replace(/\D/g,""),10);
       if(n>=SHOW_MIN) show(n);
     }).catch(()=>{});
   };
+  if(shownMax>=SHOW_MIN) show(shownMax);   // 先顯示上次看到的數字，避免空白，再用最新資料更新
   update(true);
-  setInterval(update,5*60*1000);
+  setInterval(update,BUCKET);
   document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")update()});
 })();
 </script>
