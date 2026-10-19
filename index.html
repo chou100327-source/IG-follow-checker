@@ -4,7 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
-<link rel="apple-touch-icon" href="favicon.svg">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="IG 追蹤分析">
 <title>IG 追蹤分析器｜免登入查誰沒回追、誰退追</title>
 <meta name="description" content="免費、不用登入的 IG 追蹤分析器。上傳 Instagram 官方匯出檔，快速找出誰沒回追你、你沒回追誰，以及退追紀錄。檔案只在你的瀏覽器處理，不會上傳。">
 <link rel="canonical" href="https://ig-follow-checker-five.vercel.app/">
@@ -74,6 +78,10 @@ h1 span{background:var(--grad);-webkit-background-clip:text;background-clip:text
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(214,41,118,.35)}100%{box-shadow:0 0 0 22px rgba(214,41,118,0)}}
 .in b{font-weight:700}
 .privacy{font-size:.85rem;color:var(--mut);margin-top:8px}
+.fmt{display:inline-block;margin-top:10px;padding:5px 12px;border-radius:999px;background:var(--soft);font-size:.84rem;color:var(--fg)}
+.fmt b{color:var(--acc)}
+#msg .help{display:inline-block;margin:8px 0 0;padding:7px 14px;border:1px solid var(--line);border-radius:999px;background:var(--card);color:var(--fg);font:inherit;font-size:.85rem;cursor:pointer}
+#msg .help:hover{border-color:var(--acc);color:var(--acc)}
 .demo{display:inline-block;margin:16px 0 0;min-height:40px;border:0;background:var(--blue);color:#fff;border-radius:10px;padding:8px 16px;font:inherit;font-size:.9rem;font-weight:600;cursor:pointer;transition:transform .15s,opacity .15s}
 .demo:hover{opacity:.9}.demo:active{transform:scale(.95)}
 .lead{font-size:1.02rem}
@@ -175,6 +183,7 @@ footer .visits{margin-top:14px;font-size:.82rem;color:var(--mut);animation:rise 
 footer .visits b{color:var(--fg);font-weight:800;font-variant-numeric:tabular-nums}
 footer .fine{margin-top:10px;font-size:.75rem}
 footer .fine a{color:inherit;text-decoration:underline;display:inline-block;padding:13px 8px;margin:-13px -8px}
+.excl{display:flex;align-items:center;justify-content:center;gap:6px;font-size:.8rem;color:var(--mut);margin:-8px 0 10px;cursor:pointer}
 .asof{font-size:.8rem;color:var(--mut);margin:-6px 4px 14px;text-align:center}
 /* 手機排版 */
 @media(max-width:520px){
@@ -230,6 +239,7 @@ footer .fine a{color:inherit;text-decoration:underline;display:inline-block;padd
   <div class="in">
     <div class="up"><svg viewBox="0 0 24 24"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"/></svg></div>
     <div class="lead"><b>點擊選擇</b>或拖曳 Instagram 匯出的 <b>.zip</b></div>
+    <div class="fmt">⚠️ 匯出時格式請選 <b>JSON</b>（不是 HTML）</div>
     <div class="privacy">🔒 檔案只在你的瀏覽器中處理，不會上傳</div>
     <button class="demo" id="demo" type="button" data-nopick>先用範例資料試玩</button>
     <div class="loader"></div>
@@ -248,6 +258,7 @@ footer .fine a{color:inherit;text-decoration:underline;display:inline-block;padd
 
 <div id="result" class="hidden">
   <div class="sum" id="sum"></div>
+  <label class="excl" id="exclw"><input type="checkbox" id="excl"> 人數扣除已忽略的帳號（例如被停用、封鎖的）</label>
   <div class="asof" id="asof"></div>
   <div class="tabs" id="tabs" role="tablist" aria-label="清單分類"></div>
   <div class="search"><svg viewBox="0 0 24 24" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" placeholder="搜尋帳號…" aria-label="搜尋帳號"></div>
@@ -261,6 +272,7 @@ footer .fine a{color:inherit;text-decoration:underline;display:inline-block;padd
     <button class="sbtn" id="bulk" type="button" hidden></button>
     <button class="sbtn" id="copy" type="button">複製清單</button>
     <button class="sbtn" id="csv" type="button">下載 CSV</button>
+    <button class="sbtn" id="img" type="button" title="產生只有數字的分享圖（不含任何帳號）">🖼 分享圖</button>
   </div>
   <div class="desc" id="desc"></div>
   <ul id="list"></ul>
@@ -508,6 +520,8 @@ function analyze(found,save=true){
     lost:[],added:[],prevDate:null,persisted:true,
     latest:[followers,following,unf,pend].reduce((mx,m)=>{for(const t of m.values())if(t>mx)mx=t;return mx},0)
   };
+  if(save&&prev&&prev.latest&&d.latest&&d.latest<prev.latest-86400&&!confirm("這份檔案看起來比上次分析的更舊（檔案中最新的紀錄比上次早）。\n\n繼續的話，會用這份舊檔覆蓋比對基準，退追與新增的結果可能會亂。\n\n按「確定」：仍然繼續。\n按「取消」：不更新任何紀錄。"))
+    throw fail("已取消","cancel");
   let keep=false;   // 重複上傳同一份檔案：沿用更早的比對基準，不然退追名單會被洗掉
   if(prev){
     let cmp=prev;
@@ -518,9 +532,9 @@ function analyze(found,save=true){
     d.prevDate=cmp.date;
   }
   if(save&&!keep){
-    const snap={date:ymd(),followers:[...followers.keys()]};
+    const snap={date:ymd(),latest:d.latest,followers:[...followers.keys()]};
     if(prev&&prev.followers.length<=50000)snap.base={date:prev.date,followers:prev.followers};
-    d.persisted=store.set(KEY,snap)||store.set(KEY,{date:snap.date,followers:snap.followers});
+    d.persisted=store.set(KEY,snap)||store.set(KEY,{date:snap.date,latest:snap.latest,followers:snap.followers});
   }
   return d;
 }
@@ -563,8 +577,11 @@ function countUp(el,to){
   requestAnimationFrame(step);
   setTimeout(()=>{el.textContent=to},dur+150); // 分頁在背景時動畫會暫停，確保最終數字一定正確
 }
+let exclIgn=store.get("ig-excl-v1")===true;
+const cnt=(m)=>{if(!exclIgn||!ignored.size)return m.size;let c=0;for(const n of m.keys())if(!ignored.has(n))c++;return c};
 function renderSummary(anim=true){
-  const items=[["粉絲人數",data.followers.size],["追蹤人數",data.following.size],["互相追蹤",data.mutual.length],["對方未回追",listFor("notBack").length]];
+  const mutualN=exclIgn?data.mutual.filter(([n])=>!ignored.has(n)).length:data.mutual.length;
+  const items=[["粉絲人數",cnt(data.followers)],["追蹤人數",cnt(data.following)],["互相追蹤",mutualN],["對方未回追",listFor("notBack").length]];
   $("sum").innerHTML=items.map(([l,v])=>`<div class="stat"><b data-v="${v}">${anim?0:v}</b><span>${l}</span></div>`).join("");
   if(anim)$("sum").querySelectorAll("b").forEach(b=>countUp(b,+b.dataset.v));
 }
@@ -717,8 +734,16 @@ async function handle(files){
     track("analysis-ok","分析完成");
     track("source-"+kind,"來源："+kind);
   }catch(e){
-    setMsg(e&&e.code?e.message:"發生未預期的錯誤，請重新整理頁面再試一次；若一直失敗，請確認檔案是 Instagram 匯出的 JSON。");
-    track("error-"+(e.code||"other"),"分析失敗："+(e.code||"other"));
+    if(e&&e.code==="cancel"){setMsg("已取消，沒有更新任何紀錄。")}
+    else{
+      setMsg(e&&e.code?e.message:"發生未預期的錯誤，請重新整理頁面再試一次；若一直失敗，請確認檔案是 Instagram 匯出的 JSON。");
+      if(e&&["html","no-data","missing-followers","missing-following","bad-zip","too-large"].includes(e.code)){
+        const hb=document.createElement("button"); hb.type="button"; hb.className="help"; hb.textContent="📖 看重新匯出的步驟";
+        hb.onclick=()=>{const g=document.querySelector("details.guide");g.open=true;g.scrollIntoView({behavior:"smooth",block:"start"})};
+        $("msg").append(document.createElement("br"),hb);
+      }
+    }
+    if(!(e&&e.code==="cancel"))track("error-"+((e&&e.code)||"other"),"分析失敗："+((e&&e.code)||"other"));
   }
   $("drop").classList.remove("loading");
 }
@@ -822,6 +847,8 @@ $("dfile").onchange=e=>{
 let qTimer=null;
 $("q").oninput=()=>{clearTimeout(qTimer);qTimer=setTimeout(()=>{shown=PAGE;if(data.followers)renderList()},120)};
 $("sort").onchange=e=>{sortBy=e.target.value;shown=PAGE;if(data.followers)renderList()};
+$("excl").checked=exclIgn;
+$("excl").onchange=e=>{exclIgn=e.target.checked;store.set("ig-excl-v1",exclIgn);if(data.followers)renderSummary(false)};
 $("bulk").onclick=()=>{
   const rows=visibleRows(), ign=tab==="notBack"||tab==="fans";
   if(!rows.length)return;
@@ -832,6 +859,36 @@ $("bulk").onclick=()=>{
 };
 $("copy").onclick=copyList;
 $("csv").onclick=downloadCsv;
+async function shareImage(){
+  if(!data.followers)return;
+  const mutualN=exclIgn?data.mutual.filter(([n])=>!ignored.has(n)).length:data.mutual.length;
+  const items=[["粉絲",cnt(data.followers)],["追蹤中",cnt(data.following)],["互相追蹤",mutualN],["對方未回追",listFor("notBack").length]];
+  const W=1080,H=1350,c=document.createElement("canvas"); c.width=W;c.height=H; const g=c.getContext("2d");
+  const FONT='-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Helvetica Neue",sans-serif';
+  const bg=g.createLinearGradient(0,H,W,0); [[0,"#feda75"],[.3,"#fa7e1e"],[.55,"#d62976"],[.8,"#962fbf"],[1,"#4f5bd5"]].forEach(([o,col])=>bg.addColorStop(o,col));
+  g.fillStyle=bg; g.fillRect(0,0,W,H);
+  const rr=(x,y,w,h,r)=>{g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath()};
+  g.fillStyle="rgba(0,0,0,.28)"; rr(60,60,W-120,H-120,56); g.fill();
+  g.fillStyle="#fff"; g.textAlign="center";
+  g.font=`800 78px ${FONT}`; g.fillText("我的 IG 追蹤分析",W/2,220);
+  g.font=`500 36px ${FONT}`; g.globalAlpha=.85; g.fillText(new Date().toLocaleDateString("zh-TW"),W/2,282); g.globalAlpha=1;
+  items.forEach(([l,v],i)=>{
+    const x=110+(i%2)*450, y=360+Math.floor(i/2)*330, w=410, h=290;
+    g.fillStyle="rgba(255,255,255,.16)"; rr(x,y,w,h,40); g.fill();
+    g.fillStyle="#fff"; g.font=`800 132px ${FONT}`; g.fillText(v.toLocaleString("en-US"),x+w/2,y+160);
+    g.font=`600 42px ${FONT}`; g.globalAlpha=.9; g.fillText(l,x+w/2,y+235); g.globalAlpha=1;
+  });
+  g.font=`600 40px ${FONT}`; g.fillText("免登入・檔案不上傳",W/2,1135);
+  g.font=`700 44px ${FONT}`; g.fillText("ig-follow-checker-five.vercel.app",W/2,1205);
+  track("feat-image","功能：分享圖");
+  const blob=await new Promise(res=>c.toBlob(res,"image/jpeg",.92));
+  if(!blob)return;
+  const file=new File([blob],"ig-follow-summary.jpg",{type:"image/jpeg"});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file]});return}catch(e){if(e&&e.name==="AbortError")return}}
+  const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=file.name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  flash($("img"),"已下載 ✓");
+}
+$("img").onclick=shareImage;
 $("hdl").onclick=downloadHistory;
 async function shareSite(){
   track("feat-share","功能：分享給朋友");
