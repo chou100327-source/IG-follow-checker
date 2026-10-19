@@ -969,9 +969,9 @@ $("lang").onclick=()=>{lang=lang==="en"?"zh":"en";store.set(LANG_KEY,lang);apply
 (function(){
   const SHOW_MIN=1, BUCKET=2*60*1000, KEEP="ig-visits-max-v1", el=$("visits");
   const endpoint=()=>{
-    const n=Math.floor(Date.now()/BUCKET)%2000;                       // 每 2 分鐘換一次，約 2.8 天輪一圈
-    const d=new Date(Date.UTC(2020,0,1)+n*86400000).toISOString().slice(0,10);
-    return `https://igtracker.goatcounter.com/counter/%2F.json?start=${d}`;   // 起始日早於網站上線，總數不變
+    // 起始日、結束日都用隨機值，每次都是全新的查詢，不會拿到 GoatCounter 好幾個小時前的快取數字
+    const rd=(base,span)=>new Date(base+Math.floor(Math.random()*span)*86400000).toISOString().slice(0,10);
+    return `https://igtracker.goatcounter.com/counter/%2F.json?start=${rd(Date.UTC(2020,0,1),1500)}&end=${rd(Date.UTC(2027,0,1),25000)}`;   // 起始日早於網站上線、結束日在未來，總數不變
   };
   let shownMax=Number(store.get(KEEP))||0, lastShown=0, lastT="";
   window.rerenderVisits=()=>{if(!el.hidden){el.hidden=true;show(shownMax);if(lastT)el.title=t("每 2 分鐘自動更新・最後更新 {t}",{t:lastT})}};

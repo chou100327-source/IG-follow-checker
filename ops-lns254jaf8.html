@@ -174,7 +174,7 @@ class CounterError extends Error{}
 /* ---------- 取得計數 ----------
    GoatCounter 以「完整網址」快取計數、常常好幾個小時；加上隨機的未來 end 日期，每次都是新查詢，才拿得到即時數字。 */
 async function since(path,day){
-  const end=iso(addDays(new Date(Date.UTC(2027,0,1)),Math.floor(Math.random()*3000)));
+  const end=iso(addDays(new Date(Date.UTC(2027,0,1)),Math.floor(Math.random()*25000)));
   const url=`https://${SITE}.goatcounter.com/counter/${encodeURIComponent(path)}.json?start=${iso(day)}&end=${end}`;
   let last;
   for(let i=0;i<3;i++){
