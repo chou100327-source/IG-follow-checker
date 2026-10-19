@@ -218,6 +218,7 @@ footer .fine a{color:inherit;text-decoration:underline;display:inline-block;padd
 </head>
 <body>
 <div class="glow"></div>
+<noscript><div style="max-width:560px;margin:60px auto;padding:0 16px;text-align:center;font-family:sans-serif">這個工具需要啟用 JavaScript 才能使用。請開啟瀏覽器的 JavaScript，或換用最新版的 Chrome、Safari、Edge。</div></noscript>
 <main>
 <header>
   <div class="logo" id="logo" role="button" tabindex="0" aria-label="切換深淺色"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5.5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r=".6" fill="#fff"/></svg></div>
@@ -257,6 +258,7 @@ footer .fine a{color:inherit;text-decoration:underline;display:inline-block;padd
       <option value="az">帳號：A → Z</option>
     </select>
     <span class="sp"></span>
+    <button class="sbtn" id="bulk" type="button" hidden></button>
     <button class="sbtn" id="copy" type="button">複製清單</button>
     <button class="sbtn" id="csv" type="button">下載 CSV</button>
   </div>
@@ -322,7 +324,7 @@ footer .fine a{color:inherit;text-decoration:underline;display:inline-block;padd
       <dt>已忽略</dt><dd>你按過「忽略」的帳號，會集中在這裡，可以隨時「還原」。</dd>
     </dl>
     <div class="tip"><b>常追蹤名人或品牌？</b>他們一定不會回追。在「對方未回追」或「我未回追」按帳號右邊的<b>忽略</b>，就會從清單和統計中隱藏。</div>
-    <div class="tip">點任一帳號會開啟對方的 Instagram 主頁。可用搜尋框找帳號、用下拉選單排序，也能<b>複製清單</b>或<b>下載 CSV</b>（用 Excel 或 Google 試算表開啟）。清單一次先顯示前 100 筆，按「<b>顯示更多</b>」可展開，複製和 CSV 一律包含<b>全部</b>。</div>
+    <div class="tip">點任一帳號會開啟對方的 Instagram 主頁。可用搜尋框找帳號、用下拉選單排序，也能<b>複製清單</b>或<b>下載 CSV</b>（用 Excel 或 Google 試算表開啟）。清單一次先顯示前 100 筆，按「<b>顯示更多</b>」可展開，複製和 CSV 一律包含<b>全部</b>（會跟著目前的搜尋與已忽略狀態走，被忽略的不會出現）。</div>
 
     <h2><i>5</i>怎麼看「誰退追我」與換裝置</h2>
     <ol>
@@ -469,6 +471,9 @@ function wipeStored(){
 }
 function analyze(found,save=true){
   const followers=collect(found,"followers"), following=collect(found,"following");
+  const has=k=>Object.keys(found).some(f=>FILE_RE[k].test(f));
+  if(has("following")&&!has("followers")) throw fail("只找到「追蹤中」(following.json)，缺少「粉絲名單」(followers_1.json)。兩個檔案要一起選，不然結果會是錯的。","missing-followers");
+  if(has("followers")&&!has("following")) throw fail("只找到「粉絲名單」(followers_1.json)，缺少「追蹤中」(following.json)。兩個檔案要一起選，不然結果會是錯的。","missing-following");
   if(!followers.size&&!following.size) throw fail("找不到追蹤資料，請確認匯出格式是 JSON，且包含「追蹤者與追蹤中」。","no-data");
   let prev=save?store.get(KEY):null;
   if(prev&&!Array.isArray(prev.followers)) prev=null;
@@ -528,7 +533,7 @@ const TABS=[
   ["lost","流失追蹤者","與上次分析比對：上次是你的追蹤者，現在不是。日期 = 本次偵測到的日期。"],
   ["added","新增追蹤者","與上次分析比對的新追蹤者。日期 = 本次偵測到的日期。"],
   ["unfollowed","已取消追蹤","來自 Instagram 官方紀錄的「最近取消追蹤」。"],
-  ["pending","待處理請求","還沒被接受的追蹤請求。"],
+  ["pending","待處理請求","你送出、對方還沒接受的追蹤請求。太久沒回應的，可以考慮到 Instagram 取消。"],
   ["ignored","已忽略","你按過「忽略」的帳號，可以隨時還原。"]
 ];
 
@@ -575,6 +580,7 @@ function renderList(keepFocus=false){
   const base=TABS.find(x=>x[0]===tab)[2];
   $("desc").textContent=base+(rows.length>shown?`（顯示前 ${shown.toLocaleString("en-US")} 筆，共 ${rows.length.toLocaleString("en-US")} 筆）`:"");
   const canIgnore=tab==="notBack"||tab==="fans", canRestore=tab==="ignored";
+  const bk=$("bulk"); bk.hidden=!(canIgnore||canRestore)||!rows.length; bk.textContent=canIgnore?"全部忽略":"全部還原";
   rows.slice(0,shown).forEach(([n,ts],i)=>{
     const li=document.createElement("li");
     li.style.animationDelay=Math.min(i,14)*35+"ms";
@@ -815,6 +821,14 @@ $("dfile").onchange=e=>{
 let qTimer=null;
 $("q").oninput=()=>{clearTimeout(qTimer);qTimer=setTimeout(()=>{shown=PAGE;if(data.followers)renderList()},120)};
 $("sort").onchange=e=>{sortBy=e.target.value;shown=PAGE;if(data.followers)renderList()};
+$("bulk").onclick=()=>{
+  const rows=visibleRows(), ign=tab==="notBack"||tab==="fans";
+  if(!rows.length)return;
+  const q=$("q").value.trim();
+  if(!confirm(`要${ign?"忽略":"還原"}${q?"目前搜尋到的":"這個清單的"}全部 ${rows.length} 個帳號嗎？\n${ign?"之後可以在「已忽略」分頁還原。":""}`))return;
+  rows.forEach(([n])=>ign?ignored.add(n):ignored.delete(n));
+  saveIgnored(); refreshCounts();
+};
 $("copy").onclick=copyList;
 $("csv").onclick=downloadCsv;
 $("hdl").onclick=downloadHistory;
