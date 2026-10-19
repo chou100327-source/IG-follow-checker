@@ -55,6 +55,14 @@ button:disabled{opacity:.5;cursor:default}
 svg{width:100%;height:auto;display:block}
 svg text{fill:var(--mut);font-size:10px}
 svg .grid{stroke:var(--line);stroke-width:1}
+svg .mark{stroke:var(--acc);stroke-width:1.5;stroke-dasharray:3 3}
+svg .marktxt{fill:var(--acc);font-weight:700}
+.markform{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.markform input{flex:1 1 120px;min-width:0;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--fg);font:inherit;font-size:.88rem}
+.markform button,.mk button{padding:8px 14px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--fg);font:inherit;font-size:.85rem;cursor:pointer}
+.mk{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--line);font-size:.88rem}
+.mk span{flex:1}
+.mk button{padding:4px 10px;font-size:.78rem}
 .legend{display:flex;gap:14px;flex-wrap:wrap;color:var(--mut);font-size:.8rem;margin-top:6px}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
 table{border-collapse:collapse;width:100%;font-size:.86rem}
@@ -108,6 +116,14 @@ tr.today td:first-child::after{content:" · 今天";color:var(--acc);font-size:.
 
 <div class="card insights"><h2>重點觀察</h2><div id="insights"></div></div>
 
+<div class="card"><h2>功能使用（次數）</h2><div id="features"></div></div>
+
+<div class="card"><h2>推廣標記</h2>
+  <p class="note" style="margin:0 0 10px">發了脆、Dcard 之後記一筆，圖表會畫出虛線，可以對照前後的造訪量。標記只存在這個瀏覽器。</p>
+  <form id="markForm" class="markform"><input type="date" id="markDate" required aria-label="日期"><input type="text" id="markLabel" maxlength="20" placeholder="例如：Dcard 發文" required aria-label="標記名稱"><button type="submit">新增</button></form>
+  <div id="marks"></div>
+</div>
+
 <div class="card"><h2>每日明細</h2>
   <label class="note" style="display:inline-flex;gap:6px;align-items:center;margin:-4px 0 8px;cursor:pointer"><input type="checkbox" id="hideZero" checked> 隱藏沒有任何紀錄的日子</label>
   <div class="scroll"><table id="table"></table></div>
@@ -124,8 +140,12 @@ const EVENTS={
   "analysis-ok":"成功分析","demo":"點範例資料",
   "source-zip":"zip","source-json":"JSON 檔","source-folder":"資料夾",
   "error-html":"選成 HTML 格式","error-bad-zip":"zip 損毀／非 IG 匯出檔","error-no-data":"找不到追蹤資料",
-  "error-too-large":"檔案太大","error-unreadable":"誤傳資料夾","error-other":"其他錯誤"
+  "error-too-large":"檔案太大","error-unreadable":"誤傳資料夾","error-other":"其他錯誤",
+  "error-missing-followers":"只選到追蹤中（缺粉絲名單）","error-missing-following":"只選到粉絲名單（缺追蹤中）",
+  "feat-ignore":"忽略帳號","feat-restore":"還原帳號","feat-bulk":"全部忽略／還原","feat-copy":"複製清單","feat-csv":"下載 CSV",
+  "feat-history-dl":"下載歷史紀錄","feat-history-import":"匯入歷史紀錄","feat-share":"分享給朋友","feat-theme":"切換深淺色"
 };
+const FEATURES=Object.keys(EVENTS).filter(k=>k.startsWith("feat-"));
 const ERRORS=Object.keys(EVENTS).filter(k=>k.startsWith("error-"));
 const SOURCES=["source-zip","source-json","source-folder"];
 const HINTS={
@@ -134,7 +154,9 @@ const HINTS={
   "error-no-data":"沒勾「追蹤者與追蹤中」，或 IG 改了匯出格式（要特別留意）。",
   "error-too-large":"連照片或訊息一起匯出了。要強調「只勾追蹤者與追蹤中」。",
   "error-unreadable":"把資料夾當檔案上傳。手機請用「選擇 JSON 檔」，電腦請拖曳資料夾。",
-  "error-other":"未分類的錯誤，值得回頭檢查程式。"
+  "error-other":"未分類的錯誤，值得回頭檢查程式。",
+  "error-missing-followers":"手機選 JSON 時漏選 followers_1.json。教學要強調「兩個檔案一起選」。",
+  "error-missing-following":"手機選 JSON 時漏選 following.json。教學要強調「兩個檔案一起選」。"
 };
 const PATHS=[HOME,...Object.keys(EVENTS)];
 const $=id=>document.getElementById(id);
@@ -249,6 +271,11 @@ function render(){
   [...ERRORS].sort((a,b)=>T[b]-T[a]).filter(k=>T[k]).forEach(k=>{
     er.append(rowEl(EVENTS[k],T[k],fails,"var(--bad)",pct(T[k],fails))); er.append(el("div","hint","→ "+HINTS[k]));
   });
+  // 功能使用
+  const fe=$("features"); fe.textContent=""; const fmax=Math.max(0,...FEATURES.map(k=>T[k]||0));
+  if(!fmax) fe.append(el("div","empty","還沒有功能使用紀錄（需要有人上傳分析後再操作）。"));
+  else [...FEATURES].sort((a,b)=>(T[b]||0)-(T[a]||0)).forEach(k=>fe.append(rowEl(EVENTS[k],T[k]||0,fmax,"var(--acc)","")));
+  renderMarks();
   // 明細
   renderTable(); renderInsights(attempts,ok,fails);
 }
@@ -275,6 +302,7 @@ function bars(host,rows,series,stacked){
       const tip=document.createElementNS(ns,"title"); tip.textContent=`${r.date}：${s.key==="_fail"?"失敗":s.key==="analysis-ok"?"成功":"造訪"} ${v}`; rect.append(tip);
       acc+=v;
     });
+    if(markMap[r.date]){ const mx2=x+cw/2; add("line",{x1:mx2,x2:mx2,y1:T,y2:H-B,class:"mark"}); const tt=add("text",{x:mx2+3,y:T+9,class:"marktxt"},"📣"); const ti=document.createElementNS(ns,"title"); ti.textContent=r.date+"："+markMap[r.date]; tt.append(ti) }
     if(rows.length<=16||i%Math.ceil(rows.length/10)===0) add("text",{x:x+cw/2,y:H-6,"text-anchor":"middle"},r.date.slice(5));
   });
   host.append(svg);
@@ -287,7 +315,7 @@ function renderTable(){
   const rows=[...state.daily].reverse().filter(r=>!hide||r.date===state.today||PATHS.some(p=>r[p]>0));
   const tb=el("tbody"); rows.forEach(r=>{
     const f=sumE(r,ERRORS), tr=el("tr",r.date===state.today?"today":"");
-    [r.date,r[HOME],r.demo,r["analysis-ok"],f,pct(r["analysis-ok"],r["analysis-ok"]+f)].forEach(v=>tr.append(el("td",null,typeof v==="number"?fmt(v):v))); tb.append(tr);
+    [r.date+(markMap[r.date]?" 📣 "+markMap[r.date]:""),r[HOME],r.demo,r["analysis-ok"],f,pct(r["analysis-ok"],r["analysis-ok"]+f)].forEach(v=>tr.append(el("td",null,typeof v==="number"?fmt(v):v))); tb.append(tr);
   }); t.append(tb);
   if(!rows.length){const tr=el("tr"),td=el("td","empty","這段期間沒有任何紀錄。");td.colSpan=6;tr.append(td);tb.append(tr)}
 }
@@ -301,6 +329,25 @@ function renderInsights(attempts,ok,fails){
   if(v&&T.demo/v>0.3) add("ℹ️",`有 ${pct(T.demo,v)} 的人點了範例資料，代表範例有用，也代表很多人還沒準備好檔案。`);
   const peak=[...state.daily].sort((a,b)=>b[HOME]-a[HOME])[0];
   if(peak&&peak[HOME]) add("📈",`造訪最高的一天是 ${peak.date}，共 ${peak[HOME]} 次。`);
+}
+const MKEY=`igdash-marks-${SITE}`;
+let marks=(store.get(MKEY)||[]).filter(m=>m&&/^\d{4}-\d{2}-\d{2}$/.test(m.date)&&typeof m.label==="string");
+let markMap={}; const rebuildMarks=()=>{markMap={}; marks.forEach(m=>{markMap[m.date]=markMap[m.date]?markMap[m.date]+"、"+m.label:m.label})}; rebuildMarks();
+function renderMarks(){
+  const box=$("marks"); box.textContent="";
+  [...marks].sort((a,b)=>b.date.localeCompare(a.date)).forEach(m=>{
+    const row=el("div","mk"), b=el("button",null,"刪除"); b.type="button";
+    b.onclick=()=>{marks=marks.filter(x=>x!==m);store.set(MKEY,marks);rebuildMarks();render()};
+    const idx=state.daily.findIndex(r=>r.date===m.date);
+    let note="";
+    if(idx>=0){
+      const avg=a=>a.length?a.reduce((s,r)=>s+r[HOME],0)/a.length:null;
+      const before=avg(state.daily.slice(Math.max(0,idx-3),idx)), after=avg(state.daily.slice(idx,idx+3));
+      if(before!==null&&after!==null&&state.daily.length>idx+1) note=`　前 ${Math.min(3,idx)} 天平均 ${before.toFixed(1)} → 起 ${Math.min(3,state.daily.length-idx)} 天平均 ${after.toFixed(1)} 次造訪`;
+    } else note="　（不在目前統計範圍內）";
+    row.append(el("span",null,`📣 ${m.date}　${m.label}${note}`),b); box.append(row);
+  });
+  if(!marks.length) box.append(el("div","empty","還沒有標記。"));
 }
 function renderDelta(){
   const base=baseline, box=$("delta");
@@ -327,6 +374,8 @@ $("range").value=String(store.get("igdash-range")||14);
 $("range").onchange=e=>{store.set("igdash-range",+e.target.value);load(+e.target.value)};
 $("refresh").onclick=()=>load(+$("range").value);
 $("csv").onclick=exportCsv;
+$("markDate").value=iso(utcToday());
+$("markForm").onsubmit=e=>{e.preventDefault();const label=$("markLabel").value.trim(),date=$("markDate").value;if(!label||!date)return;marks.push({date,label});store.set(MKEY,marks);rebuildMarks();$("markLabel").value="";if(state)render()};
 const THEMES=["auto","light","dark"], THEME_LABEL={auto:"🌓 自動",light:"☀️ 淺色",dark:"🌙 深色"};
 let theme=store.get("igdash-theme"); if(!THEMES.includes(theme)) theme="auto";
 function applyTheme(t){

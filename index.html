@@ -388,7 +388,7 @@ const isDark=()=>{const t=document.documentElement.getAttribute("data-theme");re
 function syncLogoLabel(){const l=$("logo");l.setAttribute("aria-label",`切換深淺色（目前：${isDark()?"深色":"淺色"}）`);l.title=isDark()?"點一下切換成淺色":"點一下切換成深色"}
 function toggleTheme(){
   const next=isDark()?"light":"dark";
-  document.documentElement.setAttribute("data-theme",next); store.set("ig-theme-v1",next); syncLogoLabel();
+  document.documentElement.setAttribute("data-theme",next); store.set("ig-theme-v1",next); syncLogoLabel(); track("feat-theme","功能：切換深淺色");
   const sv=$("logo").querySelector("svg"); sv.classList.remove("spin"); void sv.getBoundingClientRect(); sv.classList.add("spin");   // 小小的旋轉回饋
 }
 syncLogoLabel();
@@ -599,7 +599,7 @@ function renderList(keepFocus=false){
       const b=document.createElement("button"); b.className="act"; b.type="button";
       b.textContent=canIgnore?"忽略":"還原";
       b.title=canIgnore?"從清單與統計中隱藏這個帳號":"還原到原本的清單";
-      b.onclick=()=>{canIgnore?ignored.add(n):ignored.delete(n);saveIgnored();refreshCounts()};
+      b.onclick=()=>{canIgnore?ignored.add(n):ignored.delete(n);saveIgnored();refreshCounts();track(canIgnore?"feat-ignore":"feat-restore","功能：忽略／還原")};
       wrap.append(b);
     }
     li.append(wrap); ul.append(li);
@@ -639,7 +639,7 @@ async function copyList(){
   const text=rows.map(r=>r[0]).join("\n");
   try{await navigator.clipboard.writeText(text)}
   catch(e){const t=document.createElement("textarea");t.value=text;document.body.append(t);t.select();try{document.execCommand("copy")}catch(_){}t.remove()}
-  flash($("copy"),`已複製 ${rows.length} 筆 ✓`);
+  flash($("copy"),`已複製 ${rows.length} 筆 ✓`); track("feat-copy","功能：複製清單");
 }
 function csvCell(v){
   v=String(v??"");
@@ -657,7 +657,7 @@ function downloadCsv(){
   const lines=[["帳號","顯示名稱","日期","連結"].join(",")];
   for(const [n,ts] of rows) lines.push([n,(names[n]||{}).name||"",ts?new Date(ts*1000).toLocaleDateString("zh-TW"):"","https://www.instagram.com/"+n].map(csvCell).join(","));
   downloadFile(`ig-${tab}-${ymd()}.csv`,"﻿"+lines.join("\r\n"),"text/csv;charset=utf-8");
-  flash($("csv"),"已下載 ✓");
+  flash($("csv"),"已下載 ✓"); track("feat-csv","功能：下載 CSV");
 }
 
 /* ---------- 歷史紀錄：備份 / 匯入 ---------- */
@@ -666,7 +666,7 @@ function downloadHistory(){
   if(!snap||!snap.followers){flash($("hdl"),"尚無可備份的紀錄");return}
   const payload={app:"ig-follow-checker",version:1,date:snap.date,followers:snap.followers,ignored:[...ignored]};
   downloadFile(`igtracker-history-${snap.date}.json`,JSON.stringify(payload),"application/json");
-  flash($("hdl"),"已下載 ✓");
+  flash($("hdl"),"已下載 ✓"); track("feat-history-dl","功能：下載歷史紀錄");
 }
 async function importHistory(file){
   try{
@@ -685,6 +685,7 @@ async function importHistory(file){
     }
     setMsg(`已匯入 ${followers.length} 位追蹤者的紀錄（${date}）。接著上傳新的匯出檔，就會與這份紀錄比對。`,true);
     if(data.followers&&!demoMode)refreshCounts();
+    track("feat-history-import","功能：匯入歷史紀錄");
   }catch(e){setMsg("這不是有效的歷史紀錄檔。")}
 }
 
@@ -827,12 +828,13 @@ $("bulk").onclick=()=>{
   const q=$("q").value.trim();
   if(!confirm(`要${ign?"忽略":"還原"}${q?"目前搜尋到的":"這個清單的"}全部 ${rows.length} 個帳號嗎？\n${ign?"之後可以在「已忽略」分頁還原。":""}`))return;
   rows.forEach(([n])=>ign?ignored.add(n):ignored.delete(n));
-  saveIgnored(); refreshCounts();
+  saveIgnored(); refreshCounts(); track("feat-bulk","功能：全部忽略／還原");
 };
 $("copy").onclick=copyList;
 $("csv").onclick=downloadCsv;
 $("hdl").onclick=downloadHistory;
 async function shareSite(){
+  track("feat-share","功能：分享給朋友");
   const url="https://ig-follow-checker-five.vercel.app/", text="免登入的 IG 追蹤分析器：查誰沒回追、誰退追，檔案不上傳。";
   if(navigator.share){try{await navigator.share({title:document.title,text,url});return}catch(e){if(e&&e.name==="AbortError")return}}
   try{await navigator.clipboard.writeText(url)}
