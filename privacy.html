@@ -18,7 +18,9 @@
 :root[data-theme="dark"]{--bg:#000;--fg:#f5f5f5;--mut:#a8a8a8;--card:#121212;--line:#262626;--soft:#1c1c1c;--acc:#ff4f9a}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.75 -apple-system,BlinkMacSystemFont,"PingFang TC","Helvetica Neue",sans-serif}
-main{max-width:720px;margin:0 auto;padding:32px 16px 72px}
+main{max-width:720px;margin:0 auto;padding:32px 16px 72px;position:relative}
+.langbtn{position:absolute;top:32px;right:16px;min-height:34px;padding:4px 12px;border:1px solid var(--line);background:var(--card);color:var(--mut);border-radius:999px;font:inherit;font-size:.78rem;font-weight:600;cursor:pointer}
+.langbtn:hover{color:var(--acc);border-color:var(--acc)}
 a{color:var(--acc)}
 .back{display:inline-block;margin-bottom:18px;font-size:.92rem;text-decoration:none;min-height:40px;line-height:40px}
 .back:hover{text-decoration:underline}
@@ -38,6 +40,7 @@ code{background:var(--soft);padding:1px 6px;border-radius:6px;font-size:.88em}
 </head>
 <body>
 <main>
+<button class="langbtn" id="lang" type="button" aria-label="Language">EN</button>
 <a class="back" href="./">← 回到 IG 追蹤分析器</a>
 <h1>隱私權<span>說明</span></h1>
 <p class="sub">最後更新：2026-10-19</p>
@@ -91,5 +94,18 @@ code{background:var(--soft);padding:1px 6px;border-radius:6px;font-size:.88em}
   <p>有任何疑問，歡迎到 Instagram 私訊：<a href="https://www.instagram.com/mu_3.27" target="_blank" rel="noopener">@mu_3.27</a>。</p>
 </div>
 </main>
+<script>
+const LANG_KEY="ig-lang-v1", EN_HTML={".back": "← Back to IG Follow Checker", "h1": "Privacy <span>Policy</span>", ".sub": "Last updated: 2026-10-19", ".card": "\n  <h2>In one sentence</h2>\n  <p><b>Your Instagram export is processed only in your own browser and is never uploaded to any server.</b> This tool does not need your Instagram account or password.</p>\n\n  <h2>What data do we handle?</h2>\n  <ul>\n    <li><b>The export file you upload</b>: read and analyzed only in your browser's memory, gone when you close the tab, never sent anywhere.</li>\n    <li><b>Data stored in your browser</b> (only on your device; we can't read it):</li>\n  </ul>\n  <table>\n    <tr><th>What</th><th>Purpose</th></tr>\n    <tr><td>Your follower usernames and date from the last analysis</td><td>To compare next time and show who unfollowed or newly followed you</td></tr>\n    <tr><td>Accounts you pressed “Ignore” on</td><td>To hide accounts you follow on purpose from the list</td></tr>\n    <tr><td>Display names already present in your export</td><td>To show names in the list for easier recognition</td></tr>\n  </table>\n  <p class=\"mut\">These are kept in the browser's <code>localStorage</code> and are not synced anywhere automatically.</p>\n\n  <h2>Third-party services</h2>\n  <ul>\n    <li><b>Vercel</b>: the site is hosted on Vercel, whose servers may keep the usual connection logs every website has.</li>\n    <li><b>cdnjs (Cloudflare)</b>: loads the JSZip library used for unzipping. That service sees your connection information but not your files. The library is integrity-checked, so the browser refuses it if the content was tampered with.</li>\n    <li><b>GoatCounter</b>: counts visits and shows the number in the footer. By its own description it uses no cookies and stores no personally identifiable data. It receives <b>anonymous counts</b> such as “someone opened the page”, “an analysis was completed”, “the category of a failure (e.g. HTML format chosen)” and “a feature was used (e.g. Download CSV)”, to learn whether the tool works and where people get stuck. <b>It never receives your export, follower lists, usernames or any follower counts.</b></li>\n  </ul>\n\n  <h2>What we won't do</h2>\n  <ul>\n    <li>We never ask for your Instagram password or log in to your account.</li>\n    <li>We never sell or share your data, because we never collect your export.</li>\n    <li>We don't use advertising trackers.</li>\n  </ul>\n\n  <h2>How do I clear my data?</h2>\n  <ul>\n    <li>Press “<b>🗑 Clear data</b>” under the upload box, or “<b>🗑 Clear all data</b>” at the bottom of the results.</li>\n    <li>You can also clear this site's data in your browser settings.</li>\n    <li>You can first press “Download history” to back up. <b>The history file is equivalent to your follower list</b>, so keep it safe.</li>\n  </ul>\n\n  <h2>Notes</h2>\n  <ul>\n    <li>This is an independently developed tool, unaffiliated with Instagram or Meta.</li>\n    <li>Please analyze only <b>your own account's</b> export.</li>\n    <li>On a shared computer, clear your data when you finish.</li>\n  </ul>\n\n  <h2>Contact</h2>\n  <p>Questions are welcome via Instagram DM: <a href=\"https://www.instagram.com/mu_3.27\" target=\"_blank\" rel=\"noopener\">@mu_3.27</a>.</p>\n"};
+let lang=(()=>{try{const v=JSON.parse(localStorage.getItem(LANG_KEY));if(v==="zh"||v==="en")return v}catch(e){}return /^zh/i.test(navigator.language||"")?"zh":"en"})();
+const ZH_TITLE=document.title;
+function applyLang(){
+  document.documentElement.lang=lang==="en"?"en":"zh-Hant";
+  document.title=lang==="en"?"Privacy Policy | IG Follow Checker":ZH_TITLE;
+  for(const sel in EN_HTML){const e=document.querySelector(sel);if(!e)continue;if(e.dataset.zh===undefined)e.dataset.zh=e.innerHTML;e.innerHTML=lang==="en"?EN_HTML[sel]:e.dataset.zh}
+  document.getElementById("lang").textContent=lang==="en"?"中文":"EN";
+}
+document.getElementById("lang").onclick=()=>{lang=lang==="en"?"zh":"en";try{localStorage.setItem(LANG_KEY,JSON.stringify(lang))}catch(e){}applyLang()};
+applyLang();
+</script>
 </body>
 </html>

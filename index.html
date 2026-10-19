@@ -50,7 +50,9 @@ body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 -apple-system,B
 @keyframes drift{to{transform:translate3d(4%,6%,0) scale(1.1)}}
 main{max-width:720px;margin:0 auto;padding:40px 16px 80px}
 
-header{text-align:center;margin-bottom:28px;animation:rise .7s both}
+header{text-align:center;margin-bottom:28px;animation:rise .7s both;position:relative}
+.langbtn{position:absolute;top:0;right:0;min-height:34px;padding:4px 12px;border:1px solid var(--line);background:var(--card);color:var(--mut);border-radius:999px;font:inherit;font-size:.78rem;font-weight:600;cursor:pointer;transition:color .2s,border-color .2s}
+.langbtn:hover{color:var(--acc);border-color:var(--acc)}
 .logo{width:68px;height:68px;margin:0 auto 14px;border-radius:20px;background:var(--grad);background-size:200% 200%;
   display:grid;place-items:center;animation:shift 6s ease infinite,float 4s ease-in-out infinite;box-shadow:0 10px 30px rgba(214,41,118,.35)}
 .logo{cursor:pointer;-webkit-user-select:none;user-select:none}
@@ -231,6 +233,7 @@ footer .fine a{color:inherit;text-decoration:underline;display:inline-block;padd
 <main>
 <header>
   <div class="logo" id="logo" role="button" tabindex="0" aria-label="切換深淺色"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5.5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r=".6" fill="#fff"/></svg></div>
+  <button class="langbtn" id="lang" type="button" aria-label="Language">EN</button>
   <h1>IG <span>追蹤分析器</span></h1>
   <p class="sub">誰沒回追你、你沒回追誰、誰默默退追，一次看清楚</p>
 </header>
@@ -258,7 +261,7 @@ footer .fine a{color:inherit;text-decoration:underline;display:inline-block;padd
 
 <div id="result" class="hidden">
   <div class="sum" id="sum"></div>
-  <label class="excl" id="exclw"><input type="checkbox" id="excl"> 人數扣除已忽略的帳號（例如被停用、封鎖的）</label>
+  <label class="excl" id="exclw"><input type="checkbox" id="excl"> <span>人數扣除已忽略的帳號（例如被停用、封鎖的）</span></label>
   <div class="asof" id="asof"></div>
   <div class="tabs" id="tabs" role="tablist" aria-label="清單分類"></div>
   <div class="search"><svg viewBox="0 0 24 24" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" placeholder="搜尋帳號…" aria-label="搜尋帳號"></div>
@@ -370,13 +373,19 @@ footer .fine a{color:inherit;text-decoration:underline;display:inline-block;padd
 <footer><div class="credit">Designed &amp; Developed by</div>
 <a class="ig" href="https://www.instagram.com/mu_3.27" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5.5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r=".6" fill="currentColor"/></svg>@mu_3.27</a>
 <a class="star" href="https://github.com/chou100327-source/ig-follow-checker" target="_blank" rel="noopener"><span>⭐</span>幫我按個星星</a><button class="star" id="share" type="button"><span>🔗</span>分享給朋友</button><div class="visits" id="visits" hidden></div>
-<div class="fine">獨立開發之工具，與 Instagram 及 Meta 無關 · 資料僅於本機瀏覽器處理 · <a href="privacy.html">隱私權說明</a></div></footer>
+<div class="fine" id="fine">獨立開發之工具，與 Instagram 及 Meta 無關 · 資料僅於本機瀏覽器處理 · <a href="privacy.html">隱私權說明</a></div></footer>
 </main>
 
 <script data-goatcounter="https://igtracker.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" integrity="sha512-XMVd28F1oH/O71fzwBnV7HucLxVwtxf26XV8P4wPk26EDxuGZ91N8bsOttmnomcCD3CS5ZMRL50H0GgOHvegtg==" crossorigin="anonymous"></script>
 <script>
 const $=id=>document.getElementById(id);
+const LANG_KEY="ig-lang-v1";
+const EN={"切換深淺色（目前：{m}）": "Toggle dark/light (now: {m})", "深色": "dark", "淺色": "light", "點一下切換成淺色": "Tap to switch to light", "點一下切換成深色": "Tap to switch to dark", "這個檔案很大（約 {mb} MB），可能連照片或訊息一起匯出了，瀏覽器可能會當機。請重新匯出，只勾選「追蹤者與追蹤中」。": "This file is large (about {mb} MB); it may include photos or messages and could crash the browser. Please export again with only “Followers and following” selected.", "解壓縮元件沒有載入成功（可能是網路或瀏覽器擴充功能擋住）。請重新整理頁面，或先把 zip 解壓縮後改選資料夾／JSON 檔。": "The unzip component failed to load (network or a browser extension may be blocking it). Reload the page, or unzip first and choose the folder / JSON files instead.", "無法讀取這個 zip，檔案可能損毀，或不是 Instagram 的匯出檔。": "Couldn't read this zip. It may be corrupted or not an Instagram export.", "無法讀取「{f}」。如果這是資料夾，電腦請按上傳框下方的「選擇資料夾」或把資料夾拖進來；手機請改按「選擇 JSON 檔」。": "Couldn't read “{f}”. If it's a folder, on a computer use “Choose folder” under the upload box or drag the folder in; on a phone use “Choose JSON files”.", "只找到「追蹤中」(following.json)，缺少「粉絲名單」(followers_1.json)。兩個檔案要一起選，不然結果會是錯的。": "Found only “following” (following.json) and no followers list (followers_1.json). Select both files together, otherwise the results would be wrong.", "只找到「粉絲名單」(followers_1.json)，缺少「追蹤中」(following.json)。兩個檔案要一起選，不然結果會是錯的。": "Found only the followers list (followers_1.json) and no “following” (following.json). Select both files together, otherwise the results would be wrong.", "找不到追蹤資料，請確認匯出格式是 JSON，且包含「追蹤者與追蹤中」。": "No follower data found. Make sure the export format is JSON and includes “Followers and following”.", "這份檔案和上次分析的紀錄只有 {pct}% 的追蹤者相同，看起來可能是不同的帳號。\n\n按「確定」：清除舊紀錄與忽略名單，當成新帳號重新開始。\n按「取消」：保留舊紀錄，照常比對。": "This file shares only {pct}% of its followers with your last analysis, so it may be a different account.\n\nOK: clear the old history and ignore list and start fresh as a new account.\nCancel: keep the old history and compare as usual.", "這份檔案看起來比上次分析的更舊（檔案中最新的紀錄比上次早）。\n\n繼續的話，會用這份舊檔覆蓋比對基準，退追與新增的結果可能會亂。\n\n按「確定」：仍然繼續。\n按「取消」：不更新任何紀錄。": "This file looks older than your last analysis (its newest record is earlier).\n\nIf you continue, it will replace the comparison baseline and the lost/new results may be wrong.\n\nOK: continue anyway.\nCancel: don't update anything.", "已取消": "Cancelled", "對方未回追": "Not following back", "你追蹤他，但他沒追蹤你。日期 = 你追蹤他的時間。名人、品牌可按右側「忽略」隱藏。": "You follow them, but they don't follow you. Date = when you followed them. For celebrities or brands, press “Ignore” on the right to hide them.", "我未回追": "I don't follow back", "他追蹤你，但你沒追蹤他。日期 = 他追蹤你的時間。": "They follow you, but you don't follow them. Date = when they followed you.", "互相追蹤": "Mutuals", "你們互相追蹤中。": "You follow each other.", "流失追蹤者": "Lost followers", "與上次分析比對：上次是你的追蹤者，現在不是。日期 = 本次偵測到的日期。": "Compared with your last analysis: they were your followers then, but aren't now. Date = the day it was detected.", "新增追蹤者": "New followers", "與上次分析比對的新追蹤者。日期 = 本次偵測到的日期。": "New followers compared with your last analysis. Date = the day it was detected.", "已取消追蹤": "Unfollowed by me", "來自 Instagram 官方紀錄的「最近取消追蹤」。": "From Instagram's official “recently unfollowed” record.", "待處理請求": "Pending requests", "你送出、對方還沒接受的追蹤請求。太久沒回應的，可以考慮到 Instagram 取消。": "Follow requests you sent that haven't been accepted. If one has waited too long, consider cancelling it on Instagram.", "已忽略": "Ignored", "你按過「忽略」的帳號，可以隨時還原。": "Accounts you pressed “Ignore” on. You can restore them anytime.", "粉絲人數": "Followers", "追蹤人數": "Following", "（顯示前 {a} 筆，共 {b} 筆）": " (showing the first {a} of {b})", "全部忽略": "Ignore all", "全部還原": "Restore all", "查看 ›": "View ›", "忽略": "Ignore", "還原": "Restore", "從清單與統計中隱藏這個帳號": "Hide this account from the list and stats", "還原到原本的清單": "Restore to the original list", "顯示更多（還有 {n} 筆）": "Show more ({n} left)", "找不到符合的帳號": "No matching accounts", "這裡沒有資料": "Nothing here", "📅 以上是匯出檔當時的資料（檔案中最新一筆紀錄：{d}），可能與 Instagram 目前的數字略有不同。": "📅 This reflects the data at export time (newest record in the file: {d}); it may differ slightly from Instagram's current numbers.", "<br>⚠️ 這個瀏覽器無法儲存歷史紀錄（可能是無痕模式），下次就無法比對退追。請先按上方的「下載歷史紀錄」備份。": "<br>⚠️ This browser can't store history (maybe private mode), so next time lost followers can't be compared. Press “Download history” above to back up.", "退追比對基準：上次分析日期 <b>{d}</b>（存在你的瀏覽器中）。": "Comparison baseline: your last analysis on <b>{d}</b> (stored in your browser).", "這是第一次分析，已把快照存在你的瀏覽器。之後匯出新檔案再上傳，就能看到<b>退追者與新追蹤者</b>。想換裝置使用，請先按上方的「下載歷史紀錄」。": "This is your first analysis; a snapshot is saved in your browser. Export again later and upload the new file to see <b>lost and new followers</b>. To switch devices, press “Download history” above first.", "清單是空的": "The list is empty", "已複製 {n} 筆 ✓": "Copied {n} ✓", "已下載 ✓": "Downloaded ✓", "帳號": "Username", "顯示名稱": "Display name", "日期": "Date", "連結": "Link", "尚無可備份的紀錄": "No history to back up", "這個瀏覽器已有較新的紀錄（{a}），要用 {b} 的紀錄覆蓋嗎？": "This browser already has newer history ({a}). Overwrite it with the {b} history?", "已匯入 {n} 位追蹤者的紀錄（{d}）。接著上傳新的匯出檔，就會與這份紀錄比對。": "Imported history of {n} followers ({d}). Now upload a new export to compare against it.", "這不是有效的歷史紀錄檔。": "This isn't a valid history file.", "要清除這個瀏覽器中儲存的所有資料嗎？\n\n包含：上次分析的追蹤者紀錄、忽略名單、已存的顯示名稱。\n清除後，下一次分析會當成第一次。\n（想保留的話，請先按「下載歷史紀錄」備份）\n\n此動作無法復原。": "Clear all data stored in this browser?\n\nThis includes: your last follower snapshot, the ignore list and saved display names.\nThe next analysis will count as your first.\n(To keep it, press “Download history” first.)\n\nThis can't be undone.", "已清除這個瀏覽器中儲存的所有資料。現在可以上傳另一個帳號的匯出檔了。": "All data stored in this browser has been cleared. You can now upload another account's export.", "看起來你匯出的是 HTML 格式，本工具只能讀 JSON。請重新匯出，格式選「JSON」。": "It looks like you exported HTML. This tool can only read JSON. Please export again and choose “JSON”.", "已取消，沒有更新任何紀錄。": "Cancelled; nothing was updated.", "發生未預期的錯誤，請重新整理頁面再試一次；若一直失敗，請確認檔案是 Instagram 匯出的 JSON。": "An unexpected error occurred. Reload and try again; if it keeps failing, make sure the file is a JSON export from Instagram.", "📖 看重新匯出的步驟": "📖 See how to export again", "這是<b>範例資料</b>（全為虛構帳號），用來展示各分頁功能。「流失追蹤者」與「新增追蹤者」需要你上傳過兩次匯出檔才會有真實資料。": "This is <b>sample data</b> (all fictional accounts) to show each tab. “Lost followers” and “New followers” need two uploads of your own exports to show real data.", "這個資料夾裡找不到 JSON 檔。請選擇解壓縮後的資料夾（裡面有 followers_and_following）。": "No JSON files found in this folder. Choose the unzipped folder (the one containing followers_and_following).", "請在跳出的視窗中，選取「解壓縮後的資料夾」本身，再按「上傳」或「選擇」。也可以直接把資料夾拖進上方的上傳框。": "In the window that opens, select the unzipped folder itself, then press “Upload” or “Select”. You can also drag the folder into the upload box above.", "請進入 connections → followers_and_following，同時選取 followers_1.json 和 following.json（可複選）。": "Go to connections → followers_and_following and select both followers_1.json and following.json (multi-select).", "這個資料夾裡找不到 JSON 檔。請確認選的是解壓縮後的資料夾（裡面有 followers_and_following）。": "No JSON files found in this folder. Make sure you chose the unzipped folder (the one containing followers_and_following).", "要{act}{scope}全部 {n} 個帳號嗎？\n{tail}": "{act} all {n} {scope}accounts?\n{tail}", "目前搜尋到的": "searched ", "這個清單的": "", "之後可以在「已忽略」分頁還原。": "You can restore them later in the “Ignored” tab.", "粉絲": "Followers", "追蹤中": "Following", "我的 IG 追蹤分析": "My IG Follow Report", "免登入・檔案不上傳": "No login · files never uploaded", "免登入的 IG 追蹤分析器：查誰沒回追、誰退追，檔案不上傳。": "A no-login IG follow checker: see who doesn't follow back and who unfollowed. Files never leave your browser.", "✓ 已複製連結": "✓ Link copied", "每 2 分鐘自動更新・最後更新 {t}": "Auto-refreshes every 2 min · last updated {t}", "👀 已有 ": "👀 ", "人次造訪": "visits so far", "日期：新 → 舊": "Date: new → old", "日期：舊 → 新": "Date: old → new", "帳號：A → Z": "Username: A → Z", "搜尋帳號…": "Search usernames…", "已解壓縮成資料夾時使用（僅電腦版）。也可以直接把資料夾拖進上傳框": "For an already unzipped folder (desktop only). You can also drag the folder into the upload box.", "已解壓縮時，直接選取裡面的 JSON 檔": "If already unzipped, select the JSON files inside.", "匯入先前下載的歷史紀錄檔，用來比對誰退追": "Import a previously downloaded history file to compare lost followers.", "換分析另一個帳號前，清除已儲存的紀錄": "Clear saved history before analyzing a different account.", "產生只有數字的分享圖（不含任何帳號）": "Create a share image with numbers only (no usernames).", "其他選項": "More options", "清單分類": "List categories", "排序": "Sort", "搜尋帳號": "Search usernames", "IG 追蹤分析器｜免登入查誰沒回追、誰退追": "IG Follow Checker | See who doesn't follow back or unfollowed, no login", "選擇或拖曳 Instagram 匯出檔以上傳": "Choose or drag your Instagram export to upload"};
+let lang=(()=>{try{const v=JSON.parse(localStorage.getItem(LANG_KEY));if(v==="zh"||v==="en")return v}catch(e){}return /^zh/i.test(navigator.language||"")?"zh":"en"})();
+const t=(zh,v)=>{let x=lang==="en"&&EN[zh]!==undefined?EN[zh]:zh;if(v)for(const k in v)x=x.split("{"+k+"}").join(v[k]);return x};
+const loc=()=>lang==="en"?"en-US":"zh-TW";
+const EN_HTML={"h1": "IG <span>Follow Checker</span>", ".sub": "See who doesn't follow you back, who you don't follow back, and who quietly unfollowed.", ".lead": "<b>Click to choose</b> or drag your Instagram export <b>.zip</b>", ".fmt": "⚠️ When exporting, choose the <b>JSON</b> format (not HTML)", ".privacy": "🔒 Your file is processed in your browser and never uploaded", "#demo": "Try it with sample data", "#dirbtn": "📁 Choose folder", "#jsonbtn": "📄 Choose JSON files", "#himp": "💾 Import history", "#clr": "🗑 Clear data", "#copy": "Copy list", "#csv": "Download CSV", "#img": "🖼 Share image", "#hdl": "💾 Download history", "#clr2": "🗑 Clear all data", ".hist span": "Switching devices or backing up? On the new device, tap “Import history” under the upload box.", "#exclw span": "Exclude ignored accounts from the counts (e.g. banned or deactivated)", "details.guide summary": "📖 Detailed guide (tap to open)", "a.star": "<span>⭐</span>Give it a star", "#share": "<span>🔗</span>Share with friends", "#fine": "An independent tool, not affiliated with Instagram or Meta · Data is processed only in your browser · <a href=\"privacy.html\">Privacy</a>", ".how": "<b>Get your file in 3 steps</b>\n  <ol>\n    <li><b>Settings → Accounts Center → Your information and permissions → Export your information → choose account</b></li>\n    <li>Select only <b>Followers and following</b>, date range <b>All time</b>, format <b>JSON</b></li>\n    <li>Wait for the notification (<b>usually minutes to hours, up to 1–2 days</b>), download the .zip and upload it as is (<b>don't open it; valid for 4 days</b>)</li>\n  </ol>", ".gbody": "\n    <h2><i>1</i>Request the export (Instagram app)</h2>\n    <ol>\n      <li>Open Instagram, tap your <b>profile</b> at the bottom right, then the <b>menu (☰)</b> at the top right.</li>\n      <li>Tap <b>Settings and activity</b>, then open <b>Accounts Center</b>.</li>\n      <li>Tap <b>Your information and permissions</b> → <b>Export your information</b>.</li>\n      <li>Tap <b>Create export</b>, choose your Instagram account, and set the destination to <b>Export to device</b>.</li>\n      <li>Tap <b>Customize information</b> and select <b>only “Followers and following”</b>. Leave everything else unchecked.</li>\n      <li>Set <b>Date range</b> to <b>All time</b>.</li>\n      <li>Set <b>Format</b> to <b>JSON</b>. This tool can't read HTML.</li>\n      <li>Tap <b>Start export</b>.</li>\n    </ol>\n    <div class=\"tip\"><b>Why only “Followers and following”?</b> The file is smallest and fastest to process, and it doesn't include your messages, photos or other private data.</div>\n    <div class=\"tip\">Option names may vary slightly between app versions. On a computer, go to instagram.com → More → Settings → Accounts Center; the steps are the same.</div>\n\n    <h2><i>2</i>Wait and download</h2>\n    <ul>\n      <li>Usually <b>minutes to hours</b>, up to 1–2 days. Instagram sends a notification and an email when it's ready.</li>\n      <li>You can close the app while you wait.</li>\n      <li>The download link is valid for only <b>4 days</b>, so download the .zip soon after you're notified.</li>\n    </ul>\n\n    <h2><i>3</i>Upload and analyze</h2>\n    <ul>\n      <li><b>Drag the downloaded .zip onto the upload box at the top</b>, or tap it to choose the file. <b>No need to unzip it.</b></li>\n      <li>Results appear within seconds. Your export is processed in your browser and <b>never uploaded</b>.</li>\n    </ul>\n    <div class=\"tip\"><b>Safari on Mac unzips automatically?</b> Safari unzips downloads and deletes the zip by default. The easiest fix is to <b>drag the unzipped folder onto the upload box</b> (no need to open it). You can also use “<b>📁 Choose folder</b>” under the upload box (desktop); in Chrome and Edge a folder picker appears, so select that folder and confirm.</div>\n    <div class=\"tip\"><b>iPhone / Android:</b> after downloading, <b>don't open the zip</b>, or it gets unzipped into a folder. Phone file pickers <b>can't select folders</b>, so if it's already unzipped, tap “<b>📄 Choose JSON files</b>” under the upload box, go to <b>connections → followers_and_following</b>, and <b>select both followers_1.json and following.json</b> (multi-select). To also see “Unfollowed by me” and “Pending requests”, add recently_unfollowed_profiles.json and pending_follow_requests.json.</div>\n\n    <h2><i>4</i>Reading the results</h2>\n    <dl>\n      <dt>Not following back</dt><dd>You follow them, but they don't follow you. The date is when you followed them.</dd>\n      <dt>I don't follow back</dt><dd>They follow you, but you don't follow them.</dd>\n      <dt>Mutuals</dt><dd>You follow each other.</dd>\n      <dt>Lost followers</dt><dd>They were your followers at your last analysis but aren't now: they unfollowed you or the account is gone. The date is the day it was detected.</dd>\n      <dt>New followers</dt><dd>People who started following you since last time.</dd>\n      <dt>Unfollowed by me</dt><dd>Accounts you recently unfollowed, from Instagram's own records.</dd>\n      <dt>Pending requests</dt><dd>Follow requests you sent that haven't been accepted yet.</dd>\n      <dt>Ignored</dt><dd>Accounts you pressed “Ignore” on. They're collected here and you can “Restore” them anytime.</dd>\n    </dl>\n    <div class=\"tip\"><b>Follow celebrities or brands?</b> They'll never follow back. Press <b>Ignore</b> next to an account in “Not following back” or “I don't follow back” to hide it from the list and the counts.</div>\n    <div class=\"tip\">Tap any account to open their Instagram profile. Use the search box, the sort menu, and <b>Copy list</b> or <b>Download CSV</b> (open in Excel or Google Sheets). The list shows the first 100 at a time; press “<b>Show more</b>” to expand. Copy and CSV always include <b>everything</b> (following your current search and ignored accounts, which are left out).</div>\n\n    <h2><i>5</i>Seeing who unfollowed you, and switching devices</h2>\n    <ol>\n      <li>On your first upload, the tool saves your current follower list <b>in this browser</b>.</li>\n      <li>After a while (weekly or monthly is good), export again and upload the new file.</li>\n      <li>The tool compares it with last time and lists <b>Lost followers</b> and <b>New followers</b>.</li>\n    </ol>\n    <div class=\"tip\"><b>Switching devices or backing up?</b> Press “<b>Download history</b>” at the bottom of the results to get a tiny file (your follower usernames and ignore list; keep it safe). On the new device, press “<b>Import history</b>” under the upload box, then upload the new export to continue comparing.</div>\n    <div class=\"tip\">History is stored in the browser. Clearing site data, or not visiting for a long time (some browsers clean up automatically), may erase it, so back it up regularly.</div>\n    <div class=\"tip\"><b>Analyzing a different account?</b> First press “<b>Clear data</b>” under the upload box (also “🗑 Clear all data” at the bottom of the results). It removes history, the ignore list and saved names. Download your history first if you want to keep it.</div>\n\n    <h2><i>6</i>FAQ</h2>\n    <dl>\n      <dt>Do you need my Instagram password?</dt><dd>No. This tool never asks you to log in.</dd>\n      <dt>Is my data safe?</dt><dd>Your export is processed only in your own browser and never uploaded to any server. The site only counts visits anonymously without cookies, plus counts like “an analysis was completed”, “which failure type” and “which feature was used”. It never reads or sends your file contents, usernames or follower counts. See the <a href=\"privacy.html\">privacy page</a>.</dd>\n      <dt>Analyze a different account (e.g. a friend's)?</dt><dd>History is saved per browser, not per account. Press “<b>Clear data</b>” under the upload box first so two accounts don't get mixed up. If you forget, the tool notices when the followers differ a lot and asks whether to start over.</dd>\n      <dt>“No follower data found”?</dt><dd>Usually the format was HTML or “Followers and following” wasn't selected. Export again with the JSON format.</dd>\n      <dt>Numbers differ by 1–2 from my Instagram profile?</dt><dd>Usually deactivated or blocked accounts, which is normal.</dd>\n      <dt>How do I switch dark / light mode?</dt><dd>Tap the <b>Instagram icon</b> at the top of the page to toggle between dark and light; your choice is remembered. By default it follows your system setting.</dd>\n      <dt>Names show as usernames, not display names?</dt><dd>Instagram's follower export contains only usernames, no display names or profile photos. Some files (e.g. close friends, follow requests) include names, which are shown automatically.</dd>\n    </dl>\n\n    <h2><i>7</i>A star on GitHub is welcome ⭐</h2>\n    <ol>\n      <li>Tap “<b>⭐ Give it a star</b>” at the bottom of the page to open the project page.</li>\n      <li>After signing in to GitHub (<b>Sign in</b>, top right), tap <b>⭐ Starred</b> at the top right.</li>\n    </ol>\n  "};
 const fix=s=>{s=String(s??"");try{return decodeURIComponent(escape(s))}catch(e){return s}};
 const KEY="ig-follow-snapshot-v1", IKEY="ig-ignored-v1", NKEY="ig-names-v1";
 const ymd=()=>{const d=new Date(),p=n=>String(n).padStart(2,"0");return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`};
@@ -397,7 +406,7 @@ const setMsg=(t,ok=false)=>{const m=$("msg");m.textContent=t;m.className=ok?"ok"
 
 /* ---------- 深淺色：點最上方的 IG 圖示切換 ---------- */
 const isDark=()=>{const t=document.documentElement.getAttribute("data-theme");return t?t==="dark":matchMedia("(prefers-color-scheme:dark)").matches};
-function syncLogoLabel(){const l=$("logo");l.setAttribute("aria-label",`切換深淺色（目前：${isDark()?"深色":"淺色"}）`);l.title=isDark()?"點一下切換成淺色":"點一下切換成深色"}
+function syncLogoLabel(){const l=$("logo");l.setAttribute("aria-label",t("切換深淺色（目前：{m}）",{m:isDark()?t("深色"):t("淺色")}));l.title=isDark()?t("點一下切換成淺色"):t("點一下切換成深色")}
 function toggleTheme(){
   const next=isDark()?"light":"dark";
   document.documentElement.setAttribute("data-theme",next); store.set("ig-theme-v1",next); syncLogoLabel(); track("feat-theme","功能：切換深淺色");
@@ -451,10 +460,10 @@ async function readFiles(files){
   for(const f of files){
     const path=f._path||f.webkitRelativePath||f.name;
     if(f.name.toLowerCase().endsWith(".zip")){
-      if(f.size>400*1024*1024) throw fail(`這個檔案很大（約 ${Math.round(f.size/1048576)} MB），可能連照片或訊息一起匯出了，瀏覽器可能會當機。請重新匯出，只勾選「追蹤者與追蹤中」。`,"too-large");
-      if(typeof JSZip==="undefined") throw fail("解壓縮元件沒有載入成功（可能是網路或瀏覽器擴充功能擋住）。請重新整理頁面，或先把 zip 解壓縮後改選資料夾／JSON 檔。","lib");
+      if(f.size>400*1024*1024) throw fail(t("這個檔案很大（約 {mb} MB），可能連照片或訊息一起匯出了，瀏覽器可能會當機。請重新匯出，只勾選「追蹤者與追蹤中」。",{mb:Math.round(f.size/1048576)}),"too-large");
+      if(typeof JSZip==="undefined") throw fail(t("解壓縮元件沒有載入成功（可能是網路或瀏覽器擴充功能擋住）。請重新整理頁面，或先把 zip 解壓縮後改選資料夾／JSON 檔。"),"lib");
       let z;
-      try{z=await JSZip.loadAsync(f)}catch(e){throw fail("無法讀取這個 zip，檔案可能損毀，或不是 Instagram 的匯出檔。","bad-zip")}
+      try{z=await JSZip.loadAsync(f)}catch(e){throw fail(t("無法讀取這個 zip，檔案可能損毀，或不是 Instagram 的匯出檔。"),"bad-zip")}
       for(const n of Object.keys(z.files)){
         if(z.files[n].dir||!/follow/i.test(n)) continue;
         if(/\.html?$/i.test(n)){sawHtml=true;continue}
@@ -462,7 +471,7 @@ async function readFiles(files){
       }
     } else {
       let text;
-      try{text=await f.text()}catch(e){throw fail(`無法讀取「${f.name}」。如果這是資料夾，電腦請按上傳框下方的「選擇資料夾」或把資料夾拖進來；手機請改按「選擇 JSON 檔」。`,"unreadable")}
+      try{text=await f.text()}catch(e){throw fail(t("無法讀取「{f}」。如果這是資料夾，電腦請按上傳框下方的「選擇資料夾」或把資料夾拖進來；手機請改按「選擇 JSON 檔」。",{f:f.name}),"unreadable")}
       add(path,text);
     }
   }
@@ -484,9 +493,9 @@ function wipeStored(){
 function analyze(found,save=true){
   const followers=collect(found,"followers"), following=collect(found,"following");
   const has=k=>Object.keys(found).some(f=>FILE_RE[k].test(f));
-  if(has("following")&&!has("followers")) throw fail("只找到「追蹤中」(following.json)，缺少「粉絲名單」(followers_1.json)。兩個檔案要一起選，不然結果會是錯的。","missing-followers");
-  if(has("followers")&&!has("following")) throw fail("只找到「粉絲名單」(followers_1.json)，缺少「追蹤中」(following.json)。兩個檔案要一起選，不然結果會是錯的。","missing-following");
-  if(!followers.size&&!following.size) throw fail("找不到追蹤資料，請確認匯出格式是 JSON，且包含「追蹤者與追蹤中」。","no-data");
+  if(has("following")&&!has("followers")) throw fail(t("只找到「追蹤中」(following.json)，缺少「粉絲名單」(followers_1.json)。兩個檔案要一起選，不然結果會是錯的。"),"missing-followers");
+  if(has("followers")&&!has("following")) throw fail(t("只找到「粉絲名單」(followers_1.json)，缺少「追蹤中」(following.json)。兩個檔案要一起選，不然結果會是錯的。"),"missing-following");
+  if(!followers.size&&!following.size) throw fail(t("找不到追蹤資料，請確認匯出格式是 JSON，且包含「追蹤者與追蹤中」。"),"no-data");
   let prev=save?store.get(KEY):null;
   if(prev&&!Array.isArray(prev.followers)) prev=null;
   // 偵測是否換了帳號：和上次的追蹤者幾乎不重疊，很可能不是同一個人
@@ -496,7 +505,7 @@ function analyze(found,save=true){
     const base=Math.min(pf.size,followers.size);
     if(base>=10&&inter/base<0.5){
       const pct=Math.round(inter/base*100);
-      if(confirm(`這份檔案和上次分析的紀錄只有 ${pct}% 的追蹤者相同，看起來可能是不同的帳號。\n\n按「確定」：清除舊紀錄與忽略名單，當成新帳號重新開始。\n按「取消」：保留舊紀錄，照常比對。`)){
+      if(confirm(t("這份檔案和上次分析的紀錄只有 {pct}% 的追蹤者相同，看起來可能是不同的帳號。\n\n按「確定」：清除舊紀錄與忽略名單，當成新帳號重新開始。\n按「取消」：保留舊紀錄，照常比對。",{pct}))){
         wipeStored(); prev=null;
       }
     }
@@ -520,8 +529,8 @@ function analyze(found,save=true){
     lost:[],added:[],prevDate:null,persisted:true,
     latest:[followers,following,unf,pend].reduce((mx,m)=>{for(const t of m.values())if(t>mx)mx=t;return mx},0)
   };
-  if(save&&prev&&prev.latest&&d.latest&&d.latest<prev.latest-86400&&!confirm("這份檔案看起來比上次分析的更舊（檔案中最新的紀錄比上次早）。\n\n繼續的話，會用這份舊檔覆蓋比對基準，退追與新增的結果可能會亂。\n\n按「確定」：仍然繼續。\n按「取消」：不更新任何紀錄。"))
-    throw fail("已取消","cancel");
+  if(save&&prev&&prev.latest&&d.latest&&d.latest<prev.latest-86400&&!confirm(t("這份檔案看起來比上次分析的更舊（檔案中最新的紀錄比上次早）。\n\n繼續的話，會用這份舊檔覆蓋比對基準，退追與新增的結果可能會亂。\n\n按「確定」：仍然繼續。\n按「取消」：不更新任何紀錄。")))
+    throw fail(t("已取消"),"cancel");
   let keep=false;   // 重複上傳同一份檔案：沿用更早的比對基準，不然退追名單會被洗掉
   if(prev){
     let cmp=prev;
@@ -581,12 +590,12 @@ let exclIgn=store.get("ig-excl-v1")===true;
 const cnt=(m)=>{if(!exclIgn||!ignored.size)return m.size;let c=0;for(const n of m.keys())if(!ignored.has(n))c++;return c};
 function renderSummary(anim=true){
   const mutualN=exclIgn?data.mutual.filter(([n])=>!ignored.has(n)).length:data.mutual.length;
-  const items=[["粉絲人數",cnt(data.followers)],["追蹤人數",cnt(data.following)],["互相追蹤",mutualN],["對方未回追",listFor("notBack").length]];
+  const items=[[t("粉絲人數"),cnt(data.followers)],[t("追蹤人數"),cnt(data.following)],[t("互相追蹤"),mutualN],[t("對方未回追"),listFor("notBack").length]];
   $("sum").innerHTML=items.map(([l,v])=>`<div class="stat"><b data-v="${v}">${anim?0:v}</b><span>${l}</span></div>`).join("");
   if(anim)$("sum").querySelectorAll("b").forEach(b=>countUp(b,+b.dataset.v));
 }
 function renderTabs(){
-  $("tabs").innerHTML=TABS.map(([k,l])=>`<button role="tab" aria-selected="${k===tab}" data-k="${k}" class="${k===tab?"on":""}">${l}<i>${listFor(k).length}</i></button>`).join("");
+  $("tabs").innerHTML=TABS.map(([k,l])=>`<button role="tab" aria-selected="${k===tab}" data-k="${k}" class="${k===tab?"on":""}">${t(l)}<i>${listFor(k).length}</i></button>`).join("");
   $("tabs").querySelectorAll("button").forEach(b=>b.onclick=()=>{tab=b.dataset.k;shown=PAGE;renderTabs();renderList()});
 }
 function refreshCounts(){renderSummary(false);renderTabs();renderList()}
@@ -594,10 +603,10 @@ function refreshCounts(){renderSummary(false);renderTabs();renderList()}
 function renderList(keepFocus=false){
   const ul=$("list"); ul.innerHTML="";
   const rows=visibleRows();
-  const base=TABS.find(x=>x[0]===tab)[2];
-  $("desc").textContent=base+(rows.length>shown?`（顯示前 ${shown.toLocaleString("en-US")} 筆，共 ${rows.length.toLocaleString("en-US")} 筆）`:"");
+  const base=t(TABS.find(x=>x[0]===tab)[2]);
+  $("desc").textContent=base+(rows.length>shown?t("（顯示前 {a} 筆，共 {b} 筆）",{a:shown.toLocaleString("en-US"),b:rows.length.toLocaleString("en-US")}):"");
   const canIgnore=tab==="notBack"||tab==="fans", canRestore=tab==="ignored";
-  const bk=$("bulk"); bk.hidden=!(canIgnore||canRestore)||!rows.length; bk.textContent=canIgnore?"全部忽略":"全部還原";
+  const bk=$("bulk"); bk.hidden=!(canIgnore||canRestore)||!rows.length; bk.textContent=canIgnore?t("全部忽略"):t("全部還原");
   rows.slice(0,shown).forEach(([n,ts],i)=>{
     const li=document.createElement("li");
     li.style.animationDelay=Math.min(i,14)*35+"ms";
@@ -609,13 +618,13 @@ function renderList(keepFocus=false){
     const ini=document.createElement("i"); ini.textContent=(info.name||n).replace(/[^\p{L}\p{N}]/gu,"").charAt(0)||"?"; av.append(ini);
     const nm=document.createElement("span"); nm.className="nm"; nm.textContent="@"+n;
     if(info.name){const dn=document.createElement("span");dn.className="dn";dn.textContent=info.name;nm.append(dn)}
-    const dt=document.createElement("span"); dt.className="dt"; dt.textContent=ts?new Date(ts*1000).toLocaleDateString("zh-TW"):"";
-    const go=document.createElement("span"); go.className="go"; go.textContent="查看 ›";
+    const dt=document.createElement("span"); dt.className="dt"; dt.textContent=ts?new Date(ts*1000).toLocaleDateString(loc()):"";
+    const go=document.createElement("span"); go.className="go"; go.textContent=t("查看 ›");
     a.append(av,nm,dt,go); wrap.append(a);
     if(canIgnore||canRestore){
       const b=document.createElement("button"); b.className="act"; b.type="button";
-      b.textContent=canIgnore?"忽略":"還原";
-      b.title=canIgnore?"從清單與統計中隱藏這個帳號":"還原到原本的清單";
+      b.textContent=canIgnore?t("忽略"):t("還原");
+      b.title=canIgnore?t("從清單與統計中隱藏這個帳號"):t("還原到原本的清單");
       b.onclick=()=>{canIgnore?ignored.add(n):ignored.delete(n);saveIgnored();refreshCounts();track(canIgnore?"feat-ignore":"feat-restore","功能：忽略／還原")};
       wrap.append(b);
     }
@@ -624,7 +633,7 @@ function renderList(keepFocus=false){
   if(rows.length>shown){
     const li=document.createElement("li"), b=document.createElement("button");
     b.className="more"; b.type="button";
-    b.textContent=`顯示更多（還有 ${(rows.length-shown).toLocaleString("en-US")} 筆）`;
+    b.textContent=t("顯示更多（還有 {n} 筆）",{n:(rows.length-shown).toLocaleString("en-US")});
     b.onclick=()=>{shown+=STEP;renderList(true)};
     li.append(b); ul.append(li);
     if(keepFocus) b.focus({preventScroll:true});
@@ -632,19 +641,24 @@ function renderList(keepFocus=false){
   if(!rows.length){
     const e=document.createElement("div"); e.className="empty";
     e.innerHTML=`<big>${$("q").value.trim()?"🔍":"✨"}</big>`;
-    e.append($("q").value.trim()?"找不到符合的帳號":"這裡沒有資料"); ul.append(e);
+    e.append($("q").value.trim()?t("找不到符合的帳號"):t("這裡沒有資料")); ul.append(e);
   }
 }
 
+function renderMeta(){
+  if(!data.followers)return;
+  $("asof").textContent=data.latest?t("📅 以上是匯出檔當時的資料（檔案中最新一筆紀錄：{d}），可能與 Instagram 目前的數字略有不同。",{d:(()=>{const d=new Date(data.latest*1000),p=n=>String(n).padStart(2,"0");return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`})()}):"";
+  if(demoMode){$("note").innerHTML=t("這是<b>範例資料</b>（全為虛構帳號），用來展示各分頁功能。「流失追蹤者」與「新增追蹤者」需要你上傳過兩次匯出檔才會有真實資料。");return}
+  const warn=data.persisted===false?t("<br>⚠️ 這個瀏覽器無法儲存歷史紀錄（可能是無痕模式），下次就無法比對退追。請先按上方的「下載歷史紀錄」備份。"):"";
+  $("note").innerHTML=data.prevDate
+    ? t("退追比對基準：上次分析日期 <b>{d}</b>（存在你的瀏覽器中）。",{d:esc(data.prevDate)})+warn
+    : t("這是第一次分析，已把快照存在你的瀏覽器。之後匯出新檔案再上傳，就能看到<b>退追者與新追蹤者</b>。想換裝置使用，請先按上方的「下載歷史紀錄」。")+warn;
+}
 function render(){
   $("result").classList.remove("hidden");
   $("hist").hidden=demoMode;
   renderSummary(); renderTabs(); renderList();
-  $("asof").textContent=data.latest?`📅 以上是匯出檔當時的資料（檔案中最新一筆紀錄：${(()=>{const d=new Date(data.latest*1000),p=n=>String(n).padStart(2,"0");return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`})()}），可能與 Instagram 目前的數字略有不同。`:"";
-  const warn=data.persisted===false?"<br>⚠️ 這個瀏覽器無法儲存歷史紀錄（可能是無痕模式），下次就無法比對退追。請先按上方的「下載歷史紀錄」備份。":"";
-  $("note").innerHTML=data.prevDate
-    ? `退追比對基準：上次分析日期 <b>${esc(data.prevDate)}</b>（存在你的瀏覽器中）。`+warn
-    : "這是第一次分析，已把快照存在你的瀏覽器。之後匯出新檔案再上傳，就能看到<b>退追者與新追蹤者</b>。想換裝置使用，請先按上方的「下載歷史紀錄」。"+warn;
+  renderMeta();
   $("result").scrollIntoView({behavior:"smooth",block:"start"});
 }
 
@@ -652,11 +666,11 @@ function render(){
 function flash(btn,text){const o=btn.dataset.o||btn.textContent;btn.dataset.o=o;btn.textContent=text;setTimeout(()=>{btn.textContent=o},1600)}
 async function copyList(){
   const rows=visibleRows();
-  if(!rows.length){flash($("copy"),"清單是空的");return}
+  if(!rows.length){flash($("copy"),t("清單是空的"));return}
   const text=rows.map(r=>r[0]).join("\n");
   try{await navigator.clipboard.writeText(text)}
   catch(e){const t=document.createElement("textarea");t.value=text;document.body.append(t);t.select();try{document.execCommand("copy")}catch(_){}t.remove()}
-  flash($("copy"),`已複製 ${rows.length} 筆 ✓`); track("feat-copy","功能：複製清單");
+  flash($("copy"),t("已複製 {n} 筆 ✓",{n:rows.length})); track("feat-copy","功能：複製清單");
 }
 function csvCell(v){
   v=String(v??"");
@@ -670,20 +684,20 @@ function downloadFile(name,text,type){
 }
 function downloadCsv(){
   const rows=visibleRows();
-  if(!rows.length){flash($("csv"),"清單是空的");return}
-  const lines=[["帳號","顯示名稱","日期","連結"].join(",")];
-  for(const [n,ts] of rows) lines.push([n,(names[n]||{}).name||"",ts?new Date(ts*1000).toLocaleDateString("zh-TW"):"","https://www.instagram.com/"+n].map(csvCell).join(","));
+  if(!rows.length){flash($("csv"),t("清單是空的"));return}
+  const lines=[[t("帳號"),t("顯示名稱"),t("日期"),t("連結")].join(",")];
+  for(const [n,ts] of rows) lines.push([n,(names[n]||{}).name||"",ts?new Date(ts*1000).toLocaleDateString(loc()):"","https://www.instagram.com/"+n].map(csvCell).join(","));
   downloadFile(`ig-${tab}-${ymd()}.csv`,"﻿"+lines.join("\r\n"),"text/csv;charset=utf-8");
-  flash($("csv"),"已下載 ✓"); track("feat-csv","功能：下載 CSV");
+  flash($("csv"),t("已下載 ✓")); track("feat-csv","功能：下載 CSV");
 }
 
 /* ---------- 歷史紀錄：備份 / 匯入 ---------- */
 function downloadHistory(){
   const snap=store.get(KEY);
-  if(!snap||!snap.followers){flash($("hdl"),"尚無可備份的紀錄");return}
+  if(!snap||!snap.followers){flash($("hdl"),t("尚無可備份的紀錄"));return}
   const payload={app:"ig-follow-checker",version:1,date:snap.date,followers:snap.followers,ignored:[...ignored]};
   downloadFile(`igtracker-history-${snap.date}.json`,JSON.stringify(payload),"application/json");
-  flash($("hdl"),"已下載 ✓"); track("feat-history-dl","功能：下載歷史紀錄");
+  flash($("hdl"),t("已下載 ✓")); track("feat-history-dl","功能：下載歷史紀錄");
 }
 async function importHistory(file){
   try{
@@ -692,7 +706,7 @@ async function importHistory(file){
     const followers=j.followers.slice(0,200000).map(String);
     const date=typeof j.date==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(j.date)?j.date:ymd();
     const local=store.get(KEY);
-    if(local&&local.date&&local.date>date&&!confirm(`這個瀏覽器已有較新的紀錄（${local.date}），要用 ${date} 的紀錄覆蓋嗎？`)) return;
+    if(local&&local.date&&local.date>date&&!confirm(t("這個瀏覽器已有較新的紀錄（{a}），要用 {b} 的紀錄覆蓋嗎？",{a:local.date,b:date}))) return;
     store.set(KEY,{date,followers});
     if(Array.isArray(j.ignored)){
       const merged=new Set(store.get(IKEY)||[]);
@@ -700,19 +714,19 @@ async function importHistory(file){
       store.set(IKEY,[...merged]);
       if(!demoMode)ignored=merged;
     }
-    setMsg(`已匯入 ${followers.length} 位追蹤者的紀錄（${date}）。接著上傳新的匯出檔，就會與這份紀錄比對。`,true);
+    setMsg(t("已匯入 {n} 位追蹤者的紀錄（{d}）。接著上傳新的匯出檔，就會與這份紀錄比對。",{n:followers.length,d:date}),true);
     if(data.followers&&!demoMode)refreshCounts();
     track("feat-history-import","功能：匯入歷史紀錄");
-  }catch(e){setMsg("這不是有效的歷史紀錄檔。")}
+  }catch(e){setMsg(t("這不是有效的歷史紀錄檔。"))}
 }
 
 /* ---------- 清除已儲存的資料 ---------- */
 function clearAll(){
-  if(!confirm("要清除這個瀏覽器中儲存的所有資料嗎？\n\n包含：上次分析的追蹤者紀錄、忽略名單、已存的顯示名稱。\n清除後，下一次分析會當成第一次。\n（想保留的話，請先按「下載歷史紀錄」備份）\n\n此動作無法復原。")) return;
+  if(!confirm(t("要清除這個瀏覽器中儲存的所有資料嗎？\n\n包含：上次分析的追蹤者紀錄、忽略名單、已存的顯示名稱。\n清除後，下一次分析會當成第一次。\n（想保留的話，請先按「下載歷史紀錄」備份）\n\n此動作無法復原。"))) return;
   wipeStored();
   data={}; demoMode=false;
   $("result").classList.add("hidden"); $("asof").textContent="";
-  setMsg("已清除這個瀏覽器中儲存的所有資料。現在可以上傳另一個帳號的匯出檔了。",true);
+  setMsg(t("已清除這個瀏覽器中儲存的所有資料。現在可以上傳另一個帳號的匯出檔了。"),true);
   window.scrollTo({top:0,behavior:"smooth"});
 }
 
@@ -725,7 +739,7 @@ async function handle(files){
   try{
     const found=await readFiles(files);
     if(sawHtml&&!Object.keys(found).some(k=>FILE_RE.followers.test(k)||FILE_RE.following.test(k)))
-      throw fail("看起來你匯出的是 HTML 格式，本工具只能讀 JSON。請重新匯出，格式選「JSON」。","html");
+      throw fail(t("看起來你匯出的是 HTML 格式，本工具只能讀 JSON。請重新匯出，格式選「JSON」。"),"html");
     const wasDemo=demoMode;
     const d=analyze(found);
     if(wasDemo){ignored=new Set(store.get(IKEY)||[]);demoMode=false} // 成功分析後才離開範例模式
@@ -734,11 +748,11 @@ async function handle(files){
     track("analysis-ok","分析完成");
     track("source-"+kind,"來源："+kind);
   }catch(e){
-    if(e&&e.code==="cancel"){setMsg("已取消，沒有更新任何紀錄。")}
+    if(e&&e.code==="cancel"){setMsg(t("已取消，沒有更新任何紀錄。"))}
     else{
-      setMsg(e&&e.code?e.message:"發生未預期的錯誤，請重新整理頁面再試一次；若一直失敗，請確認檔案是 Instagram 匯出的 JSON。");
+      setMsg(e&&e.code?e.message:t("發生未預期的錯誤，請重新整理頁面再試一次；若一直失敗，請確認檔案是 Instagram 匯出的 JSON。"));
       if(e&&["html","no-data","missing-followers","missing-following","bad-zip","too-large"].includes(e.code)){
-        const hb=document.createElement("button"); hb.type="button"; hb.className="help"; hb.textContent="📖 看重新匯出的步驟";
+        const hb=document.createElement("button"); hb.type="button"; hb.className="help"; hb.textContent=t("📖 看重新匯出的步驟");
         hb.onclick=()=>{const g=document.querySelector("details.guide");g.open=true;g.scrollIntoView({behavior:"smooth",block:"start"})};
         $("msg").append(document.createElement("br"),hb);
       }
@@ -767,7 +781,6 @@ function demo(){
   data.pending=list([["private.user_a",2],["private.user_b",8]]);
   data.prevDate=null;
   tab="notBack"; shown=PAGE; setMsg(""); render();
-  $("note").innerHTML="這是<b>範例資料</b>（全為虛構帳號），用來展示各分頁功能。「流失追蹤者」與「新增追蹤者」需要你上傳過兩次匯出檔才會有真實資料。";
 }
 
 /* ---------- 資料夾上傳（Safari 會自動解壓縮 zip）---------- */
@@ -822,26 +835,26 @@ async function pickDirectory(){
         }
       };
       await walk(root,root.name+"/");
-      if(!files.length){setMsg("這個資料夾裡找不到 JSON 檔。請選擇解壓縮後的資料夾（裡面有 followers_and_following）。");return}
+      if(!files.length){setMsg(t("這個資料夾裡找不到 JSON 檔。請選擇解壓縮後的資料夾（裡面有 followers_and_following）。"));return}
       handle(files); return;
     }catch(e){
       if(e&&e.name==="AbortError") return;   // 使用者取消
       /* 其他錯誤（權限被拒等）→ 退回舊做法 */
     }
   }
-  setMsg("請在跳出的視窗中，選取「解壓縮後的資料夾」本身，再按「上傳」或「選擇」。也可以直接把資料夾拖進上方的上傳框。",true);
+  setMsg(t("請在跳出的視窗中，選取「解壓縮後的資料夾」本身，再按「上傳」或「選擇」。也可以直接把資料夾拖進上方的上傳框。"),true);
   $("dfile").click();
 }
 $("dirbtn").onclick=pickDirectory;
 $("jsonbtn").onclick=()=>{
-  setMsg("請進入 connections → followers_and_following，同時選取 followers_1.json 和 following.json（可複選）。",true);
+  setMsg(t("請進入 connections → followers_and_following，同時選取 followers_1.json 和 following.json（可複選）。"),true);
   $("file").click();
 };
 $("dfile").onchange=e=>{
   const fs=[...e.target.files].filter(wanted);
   fs.forEach(f=>Object.defineProperty(f,"_path",{value:f.webkitRelativePath||f.name}));
   e.target.value="";
-  if(!fs.length){setMsg("這個資料夾裡找不到 JSON 檔。請確認選的是解壓縮後的資料夾（裡面有 followers_and_following）。");return}
+  if(!fs.length){setMsg(t("這個資料夾裡找不到 JSON 檔。請確認選的是解壓縮後的資料夾（裡面有 followers_and_following）。"));return}
   handle(fs);
 };
 let qTimer=null;
@@ -853,7 +866,7 @@ $("bulk").onclick=()=>{
   const rows=visibleRows(), ign=tab==="notBack"||tab==="fans";
   if(!rows.length)return;
   const q=$("q").value.trim();
-  if(!confirm(`要${ign?"忽略":"還原"}${q?"目前搜尋到的":"這個清單的"}全部 ${rows.length} 個帳號嗎？\n${ign?"之後可以在「已忽略」分頁還原。":""}`))return;
+  if(!confirm(t("要{act}{scope}全部 {n} 個帳號嗎？\n{tail}",{act:ign?t("忽略"):t("還原"),scope:q?t("目前搜尋到的"):t("這個清單的"),n:rows.length,tail:ign?t("之後可以在「已忽略」分頁還原。"):""})))return;
   rows.forEach(([n])=>ign?ignored.add(n):ignored.delete(n));
   saveIgnored(); refreshCounts(); track("feat-bulk","功能：全部忽略／還原");
 };
@@ -862,7 +875,7 @@ $("csv").onclick=downloadCsv;
 async function shareImage(){
   if(!data.followers)return;
   const mutualN=exclIgn?data.mutual.filter(([n])=>!ignored.has(n)).length:data.mutual.length;
-  const items=[["粉絲",cnt(data.followers)],["追蹤中",cnt(data.following)],["互相追蹤",mutualN],["對方未回追",listFor("notBack").length]];
+  const items=[[t("粉絲"),cnt(data.followers)],[t("追蹤中"),cnt(data.following)],[t("互相追蹤"),mutualN],[t("對方未回追"),listFor("notBack").length]];
   const W=1080,H=1350,c=document.createElement("canvas"); c.width=W;c.height=H; const g=c.getContext("2d");
   const FONT='-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Helvetica Neue",sans-serif';
   const bg=g.createLinearGradient(0,H,W,0); [[0,"#feda75"],[.3,"#fa7e1e"],[.55,"#d62976"],[.8,"#962fbf"],[1,"#4f5bd5"]].forEach(([o,col])=>bg.addColorStop(o,col));
@@ -870,15 +883,15 @@ async function shareImage(){
   const rr=(x,y,w,h,r)=>{g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath()};
   g.fillStyle="rgba(0,0,0,.28)"; rr(60,60,W-120,H-120,56); g.fill();
   g.fillStyle="#fff"; g.textAlign="center";
-  g.font=`800 78px ${FONT}`; g.fillText("我的 IG 追蹤分析",W/2,220);
-  g.font=`500 36px ${FONT}`; g.globalAlpha=.85; g.fillText(new Date().toLocaleDateString("zh-TW"),W/2,282); g.globalAlpha=1;
+  g.font=`800 78px ${FONT}`; g.fillText(t("我的 IG 追蹤分析"),W/2,220);
+  g.font=`500 36px ${FONT}`; g.globalAlpha=.85; g.fillText(new Date().toLocaleDateString(loc()),W/2,282); g.globalAlpha=1;
   items.forEach(([l,v],i)=>{
     const x=110+(i%2)*450, y=360+Math.floor(i/2)*330, w=410, h=290;
     g.fillStyle="rgba(255,255,255,.16)"; rr(x,y,w,h,40); g.fill();
     g.fillStyle="#fff"; g.font=`800 132px ${FONT}`; g.fillText(v.toLocaleString("en-US"),x+w/2,y+160);
     g.font=`600 42px ${FONT}`; g.globalAlpha=.9; g.fillText(l,x+w/2,y+235); g.globalAlpha=1;
   });
-  g.font=`600 40px ${FONT}`; g.fillText("免登入・檔案不上傳",W/2,1135);
+  g.font=`600 40px ${FONT}`; g.fillText(t("免登入・檔案不上傳"),W/2,1135);
   g.font=`700 44px ${FONT}`; g.fillText("ig-follow-checker-five.vercel.app",W/2,1205);
   track("feat-image","功能：分享圖");
   const blob=await new Promise(res=>c.toBlob(res,"image/jpeg",.92));
@@ -886,21 +899,44 @@ async function shareImage(){
   const file=new File([blob],"ig-follow-summary.jpg",{type:"image/jpeg"});
   if(navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file]});return}catch(e){if(e&&e.name==="AbortError")return}}
   const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=file.name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
-  flash($("img"),"已下載 ✓");
+  flash($("img"),t("已下載 ✓"));
 }
 $("img").onclick=shareImage;
 $("hdl").onclick=downloadHistory;
 async function shareSite(){
   track("feat-share","功能：分享給朋友");
-  const url="https://ig-follow-checker-five.vercel.app/", text="免登入的 IG 追蹤分析器：查誰沒回追、誰退追，檔案不上傳。";
+  const url="https://ig-follow-checker-five.vercel.app/", text=t("免登入的 IG 追蹤分析器：查誰沒回追、誰退追，檔案不上傳。");
   if(navigator.share){try{await navigator.share({title:document.title,text,url});return}catch(e){if(e&&e.name==="AbortError")return}}
   try{await navigator.clipboard.writeText(url)}
   catch(e){const t=document.createElement("textarea");t.value=url;document.body.append(t);t.select();try{document.execCommand("copy")}catch(_){}t.remove()}
-  flash($("share"),"✓ 已複製連結");
+  flash($("share"),t("✓ 已複製連結"));
 }
 $("share").onclick=shareSite;
 $("clr").onclick=clearAll;
 $("clr2").onclick=clearAll;
+
+
+/* ---------- 語言切換 ---------- */
+function applyLang(){
+  document.documentElement.lang=lang==="en"?"en":"zh-Hant";
+  document.title=t("IG 追蹤分析器｜免登入查誰沒回追、誰退追");
+  for(const sel in EN_HTML){
+    const e=document.querySelector(sel); if(!e) continue;
+    if(e.dataset.zh===undefined) e.dataset.zh=e.innerHTML;
+    e.innerHTML=lang==="en"?EN_HTML[sel]:e.dataset.zh;
+    delete e.dataset.o;
+  }
+  $("lang").textContent=lang==="en"?"中文":"EN";
+  [["dirbtn","title"],["jsonbtn","title"],["himp","title"],["clr","title"],["img","title"]].forEach(([id,a])=>{const e=$(id);if(e.dataset.zhT===undefined)e.dataset.zhT=e.getAttribute(a);e.setAttribute(a,t(e.dataset.zhT))});
+  [["opts","aria-label",".opts"],["tabs","aria-label","#tabs"],["sort","aria-label","#sort"]].forEach(([k,a,sel])=>{const e=document.querySelector(sel);if(e.dataset.zhA===undefined)e.dataset.zhA=e.getAttribute(a);e.setAttribute(a,t(e.dataset.zhA))});
+  $("q").placeholder=t("搜尋帳號…"); $("q").setAttribute("aria-label",t("搜尋帳號"));
+  $("drop").setAttribute("aria-label",t("選擇或拖曳 Instagram 匯出檔以上傳"));
+  const so=$("sort").options; so[0].textContent=t("日期：新 → 舊"); so[1].textContent=t("日期：舊 → 新"); so[2].textContent=t("帳號：A → Z");
+  syncLogoLabel();
+  if(data.followers){refreshCounts();renderMeta()}
+  if(window.rerenderVisits)window.rerenderVisits();
+}
+$("lang").onclick=()=>{lang=lang==="en"?"zh":"en";store.set(LANG_KEY,lang);applyLang()};
 
 // 訪客數（GoatCounter 公開計數；未啟用或失敗時不顯示）
 // GoatCounter 會以「完整網址」快取計數、而且常常快取好幾個小時。
@@ -913,14 +949,15 @@ $("clr2").onclick=clearAll;
     const d=new Date(Date.UTC(2020,0,1)+n*86400000).toISOString().slice(0,10);
     return `https://igtracker.goatcounter.com/counter/%2F.json?start=${d}`;   // 起始日早於網站上線，總數不變
   };
-  let shownMax=Number(store.get(KEEP))||0;
-  const stamp=()=>{const d=new Date(),p=n=>String(n).padStart(2,"0");el.title=`每 2 分鐘自動更新・最後更新 ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`};
-  const show=n=>{
+  let shownMax=Number(store.get(KEEP))||0, lastShown=0, lastT="";
+  window.rerenderVisits=()=>{if(!el.hidden){el.hidden=true;show(shownMax);if(lastT)el.title=t("每 2 分鐘自動更新・最後更新 {t}",{t:lastT})}};
+  const stamp=()=>{const d=new Date(),p=n=>String(n).padStart(2,"0");lastT=`${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;el.title=t("每 2 分鐘自動更新・最後更新 {t}",{t:lastT})};
+  const show=n=>{ lastShown=n;
     if(n<=shownMax&&!el.hidden) return;
     if(n>shownMax){shownMax=n;store.set(KEEP,n)}
-    el.textContent=""; el.append("👀 已有 ");
+    el.textContent=""; el.append(t("👀 已有 "));
     const b=document.createElement("b"); b.textContent=shownMax.toLocaleString("en-US");
-    el.append(b," 人次造訪"); el.hidden=false;
+    el.append(b," "+t("人次造訪")); el.hidden=false;
   };
   const update=()=>{
     fetch(endpoint(),{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{
@@ -937,6 +974,7 @@ $("clr2").onclick=clearAll;
   window.addEventListener("pageshow",e=>{if(e.persisted)update()});   // 從上一頁／手機切回來
   window.addEventListener("online",update);
 })();
+applyLang();
 </script>
 </body>
 </html>
